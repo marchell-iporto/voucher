@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MasterVoucher;
 use App\Models\Voucher;
 use App\Models\VoucherDetail;
 use Exception;
@@ -14,7 +15,8 @@ class PaymentVoucherController extends Controller
 {
     public function index()
     {
-        return view('payment.index');
+        $accounts = MasterVoucher::all();
+        return view('payment.index', compact('accounts'));
     }
     public function store(Request $request)
     {
