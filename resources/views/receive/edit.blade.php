@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Receive Voucher - PT EDVISOR PRIME SOLUTION</title>
+    <title>Edit Receive Voucher - PT EDVISOR PRIME SOLUTION</title>
     
     <!-- jQuery and Validation Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -104,11 +104,18 @@
             cursor: not-allowed;
         }
 
-        .btn.submit { 
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        .btn.update { 
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
-        .btn.submit:hover:not(:disabled) { 
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        .btn.update:hover:not(:disabled) { 
+            background: linear-gradient(135deg, #d97706, #b45309);
+        }
+
+        .btn.delete { 
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        .btn.delete:hover:not(:disabled) { 
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
         }
 
         .container {
@@ -587,13 +594,16 @@
                 <a href="{{ route('dashboard') }}" class="back-btn">
                     ← Back to Dashboard
                 </a>
-                <h1>Receive Voucher</h1>
+                <h1>Edit Receive Voucher</h1>
             </div>
             
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button type="button" class="btn submit" id="submitBtn">
-                    📤 Submit
+                <button type="button" class="btn update" id="updateBtn">
+                    💾 Update
+                </button>
+                <button type="button" class="btn delete" id="deleteBtn" onclick="deleteVoucher()">
+                    🗑️ Delete
                 </button>
             </div>
         </div>
@@ -609,12 +619,14 @@
             </div>
 
             <!-- Form Title -->
-            <div class="form-title">RECEIVE VOUCHER</div>
+            <div class="form-title">EDIT RECEIVE VOUCHER</div>
 
             <!-- Form Content -->
-            <form id="voucherForm" method="POST" action="{{ route('recieve.store') }}">
+            <form id="voucherForm" method="POST">
                 @csrf
+                @method('PUT')
                 <input type="hidden" name="type" value="receive">
+                <input type="hidden" name="voucher_id" value="{{ $voucher->id ?? '' }}">
                 
                 <div class="form-content">
                     <!-- Form Grid -->
@@ -624,8 +636,9 @@
                             <label class="form-label">No. Voucher</label>
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
-                                <input type="text" name="voucher_number" class="form-input" required
-                                       value="{{ $voucherNumber ?? '' }}" placeholder="Enter voucher number">
+                                <input type="text" name="voucher_number" class="form-input" readonly
+                                       value="{{ $voucher->voucher_number ?? '' }}" 
+                                       style="background-color: #f9fafb; font-weight: 600; color: #059669;">
                             </div>
                         </div>
 
@@ -635,6 +648,7 @@
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
                                 <input type="text" name="reference_number" class="form-input" 
+                                       value="{{ $voucher->reference_number ?? '' }}"
                                        placeholder="Enter reference number">
                             </div>
                         </div>
@@ -644,7 +658,8 @@
                             <label class="form-label">Date</label>
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
-                                <input type="date" name="date" class="form-input" required>
+                                <input type="date" name="date" class="form-input" required
+                                       value="{{ isset($voucher) && $voucher->date ? ($voucher->date instanceof \Carbon\Carbon ? $voucher->date->format('Y-m-d') : $voucher->date) : '' }}">
                             </div>
                         </div>
 
@@ -654,20 +669,21 @@
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
                                 <div class="bank-group">
-                                    <input type="text" name="bank_code" class="bank-code" id="bankCode" readonly placeholder="Code">
+                                    <input type="text" name="bank_code" class="bank-code" id="bankCode" readonly 
+                                           value="{{ $voucher->bank_code ?? '' }}" placeholder="Code">
                                     <select name="bank_name" class="bank-select" id="bankSelect" required>
                                         <option value="">Select Cash/Bank</option>
-                                        <option value="Cash" data-code="10001">Cash</option>
-                                        <option value="Bank Mandiri" data-code="10101">Bank Mandiri</option>
-                                        <option value="Bank BCA" data-code="10102">Bank BCA</option>
-                                        <option value="Bank BNI" data-code="10103">Bank BNI</option>
-                                        <option value="Bank BRI" data-code="10104">Bank BRI</option>
-                                        <option value="Bank CIMB Niaga" data-code="10105">Bank CIMB Niaga</option>
-                                        <option value="Bank Danamon" data-code="10106">Bank Danamon</option>
-                                        <option value="Bank Permata" data-code="10107">Bank Permata</option>
-                                        <option value="Bank Maybank" data-code="10108">Bank Maybank</option>
-                                        <option value="Bank OCBC NISP" data-code="10109">Bank OCBC NISP</option>
-                                        <option value="Bank Panin" data-code="10110">Bank Panin</option>
+                                        <option value="Cash" data-code="10001" {{ ($voucher->bank_name ?? '') == 'Cash' ? 'selected' : '' }}>Cash</option>
+                                        <option value="Bank Mandiri" data-code="10101" {{ ($voucher->bank_name ?? '') == 'Bank Mandiri' ? 'selected' : '' }}>Bank Mandiri</option>
+                                        <option value="Bank BCA" data-code="10102" {{ ($voucher->bank_name ?? '') == 'Bank BCA' ? 'selected' : '' }}>Bank BCA</option>
+                                        <option value="Bank BNI" data-code="10103" {{ ($voucher->bank_name ?? '') == 'Bank BNI' ? 'selected' : '' }}>Bank BNI</option>
+                                        <option value="Bank BRI" data-code="10104" {{ ($voucher->bank_name ?? '') == 'Bank BRI' ? 'selected' : '' }}>Bank BRI</option>
+                                        <option value="Bank CIMB Niaga" data-code="10105" {{ ($voucher->bank_name ?? '') == 'Bank CIMB Niaga' ? 'selected' : '' }}>Bank CIMB Niaga</option>
+                                        <option value="Bank Danamon" data-code="10106" {{ ($voucher->bank_name ?? '') == 'Bank Danamon' ? 'selected' : '' }}>Bank Danamon</option>
+                                        <option value="Bank Permata" data-code="10107" {{ ($voucher->bank_name ?? '') == 'Bank Permata' ? 'selected' : '' }}>Bank Permata</option>
+                                        <option value="Bank Maybank" data-code="10108" {{ ($voucher->bank_name ?? '') == 'Bank Maybank' ? 'selected' : '' }}>Bank Maybank</option>
+                                        <option value="Bank OCBC NISP" data-code="10109" {{ ($voucher->bank_name ?? '') == 'Bank OCBC NISP' ? 'selected' : '' }}>Bank OCBC NISP</option>
+                                        <option value="Bank Panin" data-code="10110" {{ ($voucher->bank_name ?? '') == 'Bank Panin' ? 'selected' : '' }}>Bank Panin</option>
                                     </select>
                                 </div>
                             </div>
@@ -679,6 +695,7 @@
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
                                 <input type="text" name="from_to" class="form-input" required 
+                                       value="{{ $voucher->from_to ?? '' }}"
                                        placeholder="Enter payer name">
                             </div>
                         </div>
@@ -689,6 +706,7 @@
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
                                 <input type="text" name="description" class="form-input" required 
+                                       value="{{ $voucher->description ?? '' }}"
                                        placeholder="Enter description">
                             </div>
                         </div>
@@ -706,25 +724,54 @@
                                 </tr>
                             </thead>
                             <tbody id="accountTableBody">
-                                <tr class="account-row">
-                                    <td>
-                                        <input type="text" name="details[0][account_number]" 
-                                               placeholder="Account No." class="account-number-input" required>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="details[0][account_name]" 
-                                               placeholder="Account Name" class="account-name-input" required>
-                                    </td>
-                                    <td>
-                                        <input type="number" name="details[0][amount]" 
-                                               placeholder="0" class="amount-input" step="0.01" min="0" required>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
-                                            🗑️
-                                        </button>
-                                    </td>
-                                </tr>
+                                @if(isset($voucher) && $voucher->details && $voucher->details->count() > 0)
+                                    @foreach($voucher->details as $index => $detail)
+                                    <tr class="account-row" data-detail-id="{{ $detail->id }}">
+                                        <td>
+                                            <input type="hidden" name="details[{{ $index }}][id]" value="{{ $detail->id }}">
+                                            <input type="text" name="details[{{ $index }}][account_number]" 
+                                                   value="{{ $detail->account_number }}"
+                                                   placeholder="Account No." class="account-number-input" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="details[{{ $index }}][account_name]" 
+                                                   value="{{ $detail->account_name }}"
+                                                   placeholder="Account Name" class="account-name-input" required>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="details[{{ $index }}][amount]" 
+                                                   value="{{ $detail->amount }}"
+                                                   placeholder="0" class="amount-input" step="0.01" min="0" required>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
+                                                🗑️
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr class="account-row">
+                                        <td>
+                                            <input type="hidden" name="details[0][id]" value="">
+                                            <input type="text" name="details[0][account_number]" 
+                                                   placeholder="Account No." class="account-number-input" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="details[0][account_name]" 
+                                                   placeholder="Account Name" class="account-name-input" required>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="details[0][amount]" 
+                                                   placeholder="0" class="amount-input" step="0.01" min="0" required>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
+                                                🗑️
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                         <button type="button" class="add-row-btn" onclick="addAccountRow()">
@@ -739,11 +786,12 @@
                             <span class="total-colon">:</span>
                             <div class="total-content">
                                 <input type="text" name="terbilang" class="total-words-input" required
+                                       value="{{ $voucher->terbilang ?? '' }}"
                                        placeholder="Enter amount in words (e.g., Dua Ratus Juta Rupiah)" 
                                        id="totalWordsInput">
                                 <div class="total-amount">
-                                    Rp <span id="totalAmount">0</span>
-                                    <input type="hidden" name="total_amount" id="totalAmountInput" value="0">
+                                    Rp <span id="totalAmount">{{ isset($voucher) ? number_format($voucher->total_amount, 0, ',', '.') : '0' }}</span>
+                                    <input type="hidden" name="total_amount" id="totalAmountInput" value="{{ $voucher->total_amount ?? '0' }}">
                                 </div>
                             </div>
                         </div>
@@ -762,30 +810,26 @@
                 }
             });
 
-            // Set today's date
-            const today = new Date().toISOString().split('T')[0];
-            $('input[name="date"]').val(today);
-
             // Initialize form validation
             initializeValidation();
 
             // Event handlers
             $('#bankSelect').on('change', updateBankCode);
             $(document).on('input', '.amount-input', calculateTotal);
-            $('#submitBtn').on('click', submitVoucher);
+            $('#updateBtn').on('click', updateVoucher);
 
-            // Initialize total calculation
+            // Initialize calculations
             calculateTotal();
+            updateBankCode();
+            
+            // Debug log
+            console.log('Form initialized. Voucher ID:', $('input[name="voucher_id"]').val());
         });
 
         // Initialize jQuery Validation
         function initializeValidation() {
             $('#voucherForm').validate({
                 rules: {
-                    voucher_number: {
-                        required: true,
-                        maxlength: 255
-                    },
                     date: {
                         required: true,
                         date: true
@@ -816,10 +860,6 @@
                     }
                 },
                 messages: {
-                    voucher_number: {
-                        required: "Voucher number is required",
-                        maxlength: "Maximum 255 characters allowed"
-                    },
                     date: {
                         required: "Date is required",
                         date: "Please enter a valid date"
@@ -863,16 +903,13 @@
                     $(element).removeClass('error');
                 },
                 submitHandler: function(form) {
-                    // This will be handled by custom submit functions
                     return false;
                 }
             });
 
-            // Add validation for account rows
             addAccountRowValidation();
         }
 
-        // Add validation rules for account rows
         function addAccountRowValidation() {
             $('.account-number-input').each(function() {
                 $(this).rules('add', {
@@ -918,7 +955,8 @@
             const bankCode = $('#bankCode');
             const selectedOption = bankSelect.find('option:selected');
             
-            bankCode.val(selectedOption.data('code') || '');
+            const code = selectedOption.data('code') || selectedOption.attr('data-code') || '';
+            bankCode.val(code);
         }
 
         // Add new account row
@@ -929,6 +967,7 @@
             const newRow = `
                 <tr class="account-row">
                     <td>
+                        <input type="hidden" name="details[${rowCount}][id]" value="">
                         <input type="text" name="details[${rowCount}][account_number]" 
                                placeholder="Account No." class="account-number-input" required>
                     </td>
@@ -949,11 +988,7 @@
             `;
             
             tableBody.append(newRow);
-            
-            // Add validation for new inputs
             addAccountRowValidation();
-            
-            // Focus on first input of new row
             tableBody.find('.account-row:last .account-number-input').focus();
         }
 
@@ -962,20 +997,35 @@
             const row = $(button).closest('.account-row');
             const tableBody = $('#accountTableBody');
             
-            // Don't allow deletion if it's the only row
             if (tableBody.find('.account-row').length <= 1) {
                 showAlert('Cannot delete the last row', 'warning');
                 return;
             }
             
-            row.remove();
+            // Check if this is an existing detail (has ID)
+            const detailId = row.find('input[name*="[id]"]').val();
+            if (detailId && detailId !== '') {
+                if (!confirm('Are you sure you want to delete this account detail? This action cannot be undone.')) {
+                    return;
+                }
+                
+                // Mark for deletion by adding a hidden field
+                row.append(`<input type="hidden" name="deleted_details[]" value="${detailId}">`);
+                row.hide();
+            } else {
+                // New row, just remove it
+                row.remove();
+            }
+            
             updateRowIndices();
             calculateTotal();
         }
 
         // Update row indices after deletion
         function updateRowIndices() {
-            $('#accountTableBody .account-row').each(function(index) {
+            $('#accountTableBody .account-row:visible').each(function(index) {
+                const detailId = $(this).find('input[name*="[id]"]').val();
+                $(this).find('input[name*="[id]"]').attr('name', `details[${index}][id]`);
                 $(this).find('input[name*="[account_number]"]').attr('name', `details[${index}][account_number]`);
                 $(this).find('input[name*="[account_name]"]').attr('name', `details[${index}][account_name]`);
                 $(this).find('input[name*="[amount]"]').attr('name', `details[${index}][amount]`);
@@ -986,97 +1036,153 @@
         function calculateTotal() {
             let total = 0;
             
-            $('.amount-input').each(function() {
+            $('.account-row:visible .amount-input').each(function() {
                 const value = parseFloat($(this).val()) || 0;
                 total += value;
             });
 
-            // Update total display
+            // Round to 2 decimal places to avoid floating point issues
+            total = Math.round(total * 100) / 100;
+            
+            // Update display
             $('#totalAmount').text(total.toLocaleString('id-ID'));
             $('#totalAmountInput').val(total);
         }
 
-                // Submit voucher
-        function submitVoucher() {
-            // Calculate total before validation
+        // Update voucher with proper URL handling
+        function updateVoucher() {
+            // Force calculate total
             calculateTotal();
             
-            if ($('#voucherForm').valid() && validateAccountRows()) {
-                // Ensure total amount is updated in hidden field
-                const totalAmount = parseFloat($('#totalAmountInput').val()) || 0;
-                
-                if (totalAmount <= 0) {
-                    showAlert('Total amount must be greater than 0.', 'warning');
-                    return;
+            // Get voucher ID
+            const voucherId = $('input[name="voucher_id"]').val();
+            if (!voucherId) {
+                showAlert('Voucher ID not found. Please refresh the page.', 'error');
+                return;
+            }
+            
+            // Validate form
+            if (!$('#voucherForm').valid() || !validateAccountRows()) {
+                showAlert('Please fix validation errors before submitting.', 'warning');
+                return;
+            }
+            
+            // Build the correct URL for Laravel PUT route
+            const updateUrl = `/receive-voucher/${voucherId}`;
+            
+            // Manually build form data
+            const formElement = document.getElementById('voucherForm');
+            const formData = new FormData(formElement);
+            
+            // Ensure total amount is properly formatted
+            const total = parseFloat($('#totalAmountInput').val()) || 0;
+            formData.set('total_amount', total.toString());
+            
+            console.log('=== UPDATE REQUEST ===');
+            console.log('Voucher ID:', voucherId);
+            console.log('Update URL:', updateUrl);
+            console.log('Total Amount:', total);
+            console.log('Method Override:', formData.get('_method'));
+            
+            $('#updateBtn').prop('disabled', true).addClass('loading');
+            
+            $.ajax({
+                url: updateUrl,
+                method: 'POST', // Laravel uses POST with _method override
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log('=== UPDATE SUCCESS ===', response);
+                    if (response.success) {
+                        showAlert(response.message || 'Voucher updated successfully!', 'success');
+                        setTimeout(function() {
+                            window.location.href = "{{ route('dashboard') }}";
+                        }, 2000);
+                    } else {
+                        showAlert(response.message || 'Failed to update voucher.', 'error');
+                    }
+                },
+                error: function(xhr) {
+                    console.log('=== UPDATE ERROR ===');
+                    console.log('Status:', xhr.status);
+                    console.log('Response:', xhr.responseJSON);
+                    
+                    let message = 'Update failed: ';
+                    
+                    if (xhr.status === 405) {
+                        message = 'Route method not allowed. Please check your Laravel routes.';
+                    } else if (xhr.status === 404) {
+                        message = 'Voucher not found. It may have been deleted.';
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message += xhr.responseJSON.message;
+                    } else {
+                        message += `HTTP ${xhr.status} error occurred.`;
+                    }
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        Object.keys(errors).forEach(function(field) {
+                            message += '\n' + field + ': ' + (Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field]);
+                        });
+                    }
+                    
+                    showAlert(message, 'error');
+                },
+                complete: function() {
+                    $('#updateBtn').prop('disabled', false).removeClass('loading');
                 }
-                
-                const formData = $('#voucherForm').serialize();
-                
-                // Show loading state
-                $('#submitBtn').prop('disabled', true).addClass('loading');
+            });
+        }
+
+        // Delete entire voucher
+        function deleteVoucher() {
+            const voucherId = $('input[name="voucher_id"]').val();
+            const voucherNumber = $('input[name="voucher_number"]').val();
+            
+            if (!voucherId) {
+                showAlert('Voucher ID not found. Please refresh the page.', 'error');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to DELETE voucher ${voucherNumber}?\n\nThis will permanently delete the entire voucher and all its details.\n\nThis action cannot be undone.`)) {
+                const deleteUrl = `/dashboard/voucher/${voucherId}`;
                 
                 $.ajax({
-                    url: $('#voucherForm').attr('action'),
-                    method: 'POST',
-                    data: formData,
+                    url: deleteUrl,
+                    method: 'DELETE',
                     success: function(response) {
                         if (response.success) {
-                            showAlert(response.message || 'Voucher submitted successfully!', 'success');
+                            showAlert(response.message, 'success');
                             setTimeout(function() {
-                                if (response.redirect_url) {
-                                    window.location.href = response.redirect_url;
-                                } else {
-                                    // Redirect ke dashboard atau halaman index vouchers
-                                    window.location.href = "{{ route('dashboard') }}";
-                                }
+                                window.location.href = "{{ route('dashboard') }}";
                             }, 2000);
                         } else {
-                            showAlert(response.message || 'Failed to submit voucher.', 'error');
+                            showAlert(response.message || 'Failed to delete voucher', 'error');
                         }
                     },
                     error: function(xhr) {
-                        let message = 'An error occurred while submitting the voucher.';
-                        
+                        let message = 'Failed to delete voucher';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             message = xhr.responseJSON.message;
-                        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            const errors = xhr.responseJSON.errors;
-                            const errorMessages = [];
-                            
-                            // Handle validation errors
-                            Object.keys(errors).forEach(function(field) {
-                                if (Array.isArray(errors[field])) {
-                                    errorMessages.push(...errors[field]);
-                                } else {
-                                    errorMessages.push(errors[field]);
-                                }
-                            });
-                            
-                            message = errorMessages.join('<br>');
                         }
-                        
                         showAlert(message, 'error');
-                    },
-                    complete: function() {
-                        $('#submitBtn').prop('disabled', false).removeClass('loading');
                     }
                 });
-            } else {
-                showAlert('Please fill in all required fields correctly.', 'warning');
             }
         }
 
         // Validate account rows
         function validateAccountRows() {
-            const rows = $('#accountTableBody .account-row');
+            const visibleRows = $('#accountTableBody .account-row:visible');
             let valid = true;
             
-            if (rows.length === 0) {
+            if (visibleRows.length === 0) {
                 showAlert('Please add at least one account row.', 'warning');
                 return false;
             }
             
-            rows.each(function() {
+            visibleRows.each(function() {
                 const accountNumber = $(this).find('.account-number-input').val().trim();
                 const accountName = $(this).find('.account-name-input').val().trim();
                 const amount = parseFloat($(this).find('.amount-input').val()) || 0;
@@ -1105,22 +1211,11 @@
             
             $('#alertContainer').html(alertHtml);
             
-            // Auto hide after 5 seconds
             setTimeout(function() {
                 $('#alertContainer').fadeOut(500, function() {
                     $(this).empty().show();
                 });
             }, 5000);
-        }
-
-        // Generate voucher number (if needed for receive voucher)
-        function generateVoucherNumber() {
-            const date = new Date();
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            
-            return `RV-3/${year}/${month}/${day}01`;
         }
     </script>
 </body>

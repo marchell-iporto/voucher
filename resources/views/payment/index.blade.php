@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Payment Voucher - PT EDVISOR PRIME SOLUTION</title>
+    
+    <!-- jQuery and Validation Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -87,37 +94,21 @@
             text-decoration: none;
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        .btn.add { 
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        .btn.add:hover { 
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-
-        .btn.edit { 
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-        .btn.edit:hover { 
-            background: linear-gradient(135deg, #d97706, #b45309);
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn.submit { 
             background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
-        .btn.submit:hover { 
+        .btn.submit:hover:not(:disabled) { 
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
-        }
-
-        .btn.delete { 
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-        .btn.delete:hover { 
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
         }
 
         .container {
@@ -183,7 +174,7 @@
 
         .form-field {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 10px;
             margin-bottom: 15px;
         }
@@ -197,11 +188,17 @@
             color: #374151;
             min-width: 100px;
             font-size: 14px;
+            padding-top: 8px;
         }
 
         .form-colon {
             font-weight: 600;
             color: #6b7280;
+            padding-top: 8px;
+        }
+
+        .form-input-wrapper {
+            flex: 1;
         }
 
         .form-input {
@@ -211,7 +208,7 @@
             padding: 8px 12px;
             border-radius: 6px;
             transition: all 0.3s ease;
-            flex: 1;
+            width: 100%;
         }
 
         .form-input:focus {
@@ -224,10 +221,15 @@
             color: #6b7280;
         }
 
+        .form-input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
         .bank-group {
             display: flex;
             gap: 8px;
-            flex: 1;
+            width: 100%;
         }
 
         .bank-code {
@@ -264,6 +266,11 @@
 
         .bank-select:hover {
             border-color: #94a3b8;
+        }
+
+        .bank-select.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
         }
 
         .account-section {
@@ -303,10 +310,28 @@
             font-family: 'Courier New', monospace;
         }
 
-        .account-table .account-code {
-            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-            color: #059669;
-            font-weight: 600;
+        .account-table input {
+            border: none;
+            width: 100%;
+            background: transparent;
+            outline: none;
+            padding: 4px;
+            font-size: 14px;
+        }
+
+        .account-table input:focus {
+            background: #f8fafc;
+            border-radius: 4px;
+        }
+
+        .account-table input.error {
+            background: #fef2f2;
+            border: 1px solid #ef4444;
+            border-radius: 4px;
+        }
+
+        .account-table .amount-input {
+            text-align: right;
             font-family: 'Courier New', monospace;
         }
 
@@ -330,6 +355,22 @@
             background: linear-gradient(135deg, #059669, #047857);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .delete-row-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .delete-row-btn:hover {
+            background: #dc2626;
         }
 
         .total-section {
@@ -383,6 +424,11 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
+        .total-words-input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
         .total-amount {
             font-weight: 700;
             border-top: 2px solid #374151;
@@ -392,6 +438,68 @@
             font-family: 'Courier New', monospace;
             min-width: 150px;
             text-align: right;
+        }
+
+        /* Validation Error Messages */
+        label.error {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+            font-weight: normal;
+        }
+
+        /* Loading State */
+        .loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success/Error Messages */
+        .alert {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .alert-warning {
+            background: #fefbf2;
+            border: 1px solid #fed7aa;
+            color: #ea580c;
         }
 
         @media (max-width: 768px) {
@@ -460,7 +568,7 @@
                 display: none;
             }
 
-            .add-row-btn {
+            .add-row-btn, .delete-row-btn {
                 display: none;
             }
 
@@ -484,11 +592,14 @@
             
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="btn submit" onclick="submitVoucher()">
+                <button type="button" class="btn submit" id="submitBtn">
                     📤 Submit
                 </button>
             </div>
         </div>
+
+        <!-- Alert Messages -->
+        <div id="alertContainer"></div>
 
         <div class="container">
             <!-- Header -->
@@ -501,181 +612,515 @@
             <div class="form-title">PAYMENT VOUCHER</div>
 
             <!-- Form Content -->
-            <div class="form-content">
-                <!-- Form Grid -->
-                <div class="form-grid">
-                    <!-- No. Voucher -->
-                    <div class="form-field">
-                        <label class="form-label">No. Voucher</label>
-                        <span class="form-colon">:</span>
-                        <input type="text" class="form-input" placeholder="Enter voucher number">
-                    </div>
+            <form id="voucherForm" method="POST" action="{{ route('payment.store') }}">
+                @csrf
+                <input type="hidden" name="type" value="payment">
+                
+                <div class="form-content">
+                    <!-- Form Grid -->
+                    <div class="form-grid">
+                        <!-- No. Voucher -->
+                        <div class="form-field">
+                            <label class="form-label">No. Voucher</label>
+                            <span class="form-colon">:</span>
+                            <div class="form-input-wrapper">
+                                <input type="text" name="voucher_number" class="form-input" required
+                                       value="{{ $voucherNumber ?? '' }}" placeholder="Enter voucher number">
+                            </div>
+                        </div>
 
-                    <!-- Referensi No. -->
-                    <div class="form-field">
-                        <label class="form-label">Referensi No.</label>
-                        <span class="form-colon">:</span>
-                        <input type="text" class="form-input" placeholder="Enter reference number">
-                    </div>
+                        <!-- Referensi No. -->
+                        <div class="form-field">
+                            <label class="form-label">Referensi No.</label>
+                            <span class="form-colon">:</span>
+                            <div class="form-input-wrapper">
+                                <input type="text" name="reference_number" class="form-input" 
+                                       placeholder="Enter reference number">
+                            </div>
+                        </div>
 
-                    <!-- Date -->
-                    <div class="form-field">
-                        <label class="form-label">Date</label>
-                        <span class="form-colon">:</span>
-                        <input type="date" class="form-input">
-                    </div>
+                        <!-- Date -->
+                        <div class="form-field">
+                            <label class="form-label">Date</label>
+                            <span class="form-colon">:</span>
+                            <div class="form-input-wrapper">
+                                <input type="date" name="date" class="form-input" required>
+                            </div>
+                        </div>
 
-                    <!-- Cash / Bank -->
-                    <div class="form-field">
-                        <label class="form-label">Cash / Bank</label>
-                        <span class="form-colon">:</span>
-                        <div class="bank-group">
-                            <input type="text" class="bank-code" id="bankCode" readonly placeholder="Code">
-                            <select class="bank-select" id="bankSelect" onchange="updateBankCode()">
-                                <option value="">Select Cash/Bank</option>
-                                <option value="10001">Cash</option>
-                                <option value="10101">Bank Mandiri</option>
-                                <option value="10102">Bank BCA</option>
-                                <option value="10103">Bank BNI</option>
-                                <option value="10104">Bank BRI</option>
-                                <option value="10105">Bank CIMB Niaga</option>
-                                <option value="10106">Bank Danamon</option>
-                                <option value="10107">Bank Permata</option>
-                                <option value="10108">Bank Maybank</option>
-                                <option value="10109">Bank OCBC NISP</option>
-                                <option value="10110">Bank Panin</option>
-                            </select>
+                        <!-- Cash / Bank -->
+                        <div class="form-field">
+                            <label class="form-label">Cash / Bank</label>
+                            <span class="form-colon">:</span>
+                            <div class="form-input-wrapper">
+                                <div class="bank-group">
+                                    <input type="text" name="bank_code" class="bank-code" id="bankCode" readonly placeholder="Code">
+                                    <select name="bank_name" class="bank-select" id="bankSelect" required>
+                                        <option value="">Select Cash/Bank</option>
+                                        <option value="Cash" data-code="10001">Cash</option>
+                                        <option value="Bank Mandiri" data-code="10101">Bank Mandiri</option>
+                                        <option value="Bank BCA" data-code="10102">Bank BCA</option>
+                                        <option value="Bank BNI" data-code="10103">Bank BNI</option>
+                                        <option value="Bank BRI" data-code="10104">Bank BRI</option>
+                                        <option value="Bank CIMB Niaga" data-code="10105">Bank CIMB Niaga</option>
+                                        <option value="Bank Danamon" data-code="10106">Bank Danamon</option>
+                                        <option value="Bank Permata" data-code="10107">Bank Permata</option>
+                                        <option value="Bank Maybank" data-code="10108">Bank Maybank</option>
+                                        <option value="Bank OCBC NISP" data-code="10109">Bank OCBC NISP</option>
+                                        <option value="Bank Panin" data-code="10110">Bank Panin</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Receive From -->
+                        <div class="form-field full-width">
+                            <label class="form-label">Payment To</label>
+                            <span class="form-colon">:</span>
+                            <div class="form-input-wrapper">
+                                <input type="text" name="from_to" class="form-input" required 
+                                       placeholder="Enter name">
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-field full-width">
+                            <label class="form-label">Description</label>
+                            <span class="form-colon">:</span>
+                            <div class="form-input-wrapper">
+                                <input type="text" name="description" class="form-input" required 
+                                       placeholder="Enter description">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Payment To -->
-                    <div class="form-field full-width">
-                        <label class="form-label">Payment To</label>
-                        <span class="form-colon">:</span>
-                        <input type="text" class="form-input" placeholder="Enter payee name">
+                    <!-- Account Table -->
+                    <div class="account-section">
+                        <table class="account-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 120px;">Acc. No.</th>
+                                    <th>Acc. Name</th>
+                                    <th style="width: 150px;">Amount</th>
+                                    <th style="width: 80px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accountTableBody">
+                                <tr class="account-row">
+                                    <td>
+                                        <input type="text" name="details[0][account_number]" 
+                                               placeholder="Account No." class="account-number-input" required>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="details[0][account_name]" 
+                                               placeholder="Account Name" class="account-name-input" required>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="details[0][amount]" 
+                                               placeholder="0" class="amount-input" step="0.01" min="0" required>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
+                                            🗑️
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="add-row-btn" onclick="addAccountRow()">
+                            ➕ Add Account Row
+                        </button>
                     </div>
 
-                    <!-- Description -->
-                    <div class="form-field full-width">
-                        <label class="form-label">Description</label>
-                        <span class="form-colon">:</span>
-                        <input type="text" class="form-input" placeholder="Enter description">
-                    </div>
-                </div>
-
-                <!-- Account Table -->
-                <div class="account-section">
-                    <table class="account-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 120px;">Acc. No.</th>
-                                <th>Acc. Name</th>
-                                <th style="width: 150px;">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody id="accountTableBody">
-                            <tr>
-                                <td><input type="text" placeholder="Account No." style="border: none; width: 100%; background: transparent;"></td>
-                                <td><input type="text" placeholder="Account Name" style="border: none; width: 100%; background: transparent;"></td>
-                                <td><input type="number" placeholder="0" style="border: none; width: 100%; background: transparent; text-align: right;" onchange="calculateTotal()"></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <button class="add-row-btn" onclick="addAccountRow()">
-                        ➕ Add Account Row
-                    </button>
-                </div>
-
-                <!-- Total Section -->
-                <div class="total-section">
-                    <div class="total-field">
-                        <label class="total-label">Terbilang</label>
-                        <span class="total-colon">:</span>
-                        <div class="total-content">
-                            <input type="text" class="total-words-input" placeholder="Enter amount in words (e.g., Dua Ratus Juta Rupiah)" id="totalWordsInput">
-                            <div class="total-amount">
-                                <span id="totalAmount">0</span>
+                    <!-- Total Section -->
+                    <div class="total-section">
+                        <div class="total-field">
+                            <label class="total-label">Terbilang</label>
+                            <span class="total-colon">:</span>
+                            <div class="total-content">
+                                <input type="text" name="terbilang" class="total-words-input" required
+                                       placeholder="Enter amount in words (e.g., Dua Ratus Juta Rupiah)" 
+                                       id="totalWordsInput">
+                                <div class="total-amount">
+                                    Rp <span id="totalAmount">0</span>
+                                    <input type="hidden" name="total_amount" id="totalAmountInput" value="0">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // Function to update bank code based on selection
-        function updateBankCode() {
-            const bankSelect = document.getElementById('bankSelect');
-            const bankCode = document.getElementById('bankCode');
-            
-            bankCode.value = bankSelect.value;
-        }
-
-        // Function to add new account row
-        function addAccountRow() {
-            const tableBody = document.getElementById('accountTableBody');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td><input type="text" placeholder="Account No." style="border: none; width: 100%; background: transparent;"></td>
-                <td><input type="text" placeholder="Account Name" style="border: none; width: 100%; background: transparent;"></td>
-                <td><input type="number" placeholder="0" style="border: none; width: 100%; background: transparent; text-align: right;" onchange="calculateTotal()"></td>
-            `;
-            
-            // Insert before the last empty rows
-            const emptyRows = tableBody.querySelectorAll('tr');
-            const insertIndex = Math.max(0, emptyRows.length - 2);
-            tableBody.insertBefore(newRow, emptyRows[insertIndex]);
-        }
-
-        // Function to calculate total
-        function calculateTotal() {
-            const amounts = document.querySelectorAll('#accountTableBody input[type="number"]');
-            let total = 0;
-            
-            amounts.forEach(input => {
-                if (input.value) {
-                    total += parseFloat(input.value);
+        $(document).ready(function() {
+            // Set CSRF token for AJAX requests
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
 
-            // Update total display
-            document.getElementById('totalAmount').textContent = total.toLocaleString('id-ID');
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            $('input[name="date"]').val(today);
+
+            // Initialize form validation
+            initializeValidation();
+
+            // Event handlers
+            $('#bankSelect').on('change', updateBankCode);
+            $(document).on('input', '.amount-input', calculateTotal);
+            $('#submitBtn').on('click', submitVoucher);
+
+            // Initialize total calculation
+            calculateTotal();
+        });
+
+        // Initialize jQuery Validation
+        function initializeValidation() {
+            $('#voucherForm').validate({
+                rules: {
+                    voucher_number: {
+                        required: true,
+                        maxlength: 255
+                    },
+                    date: {
+                        required: true,
+                        date: true
+                    },
+                    bank_name: {
+                        required: true
+                    },
+                    from_to: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 255
+                    },
+                    description: {
+                        required: true,
+                        minlength: 5
+                    },
+                    terbilang: {
+                        required: true,
+                        minlength: 5
+                    },
+                    reference_number: {
+                        maxlength: 255
+                    },
+                    total_amount: {
+                        required: true,
+                        number: true,
+                        min: 0.01
+                    }
+                },
+                messages: {
+                    voucher_number: {
+                        required: "Voucher number is required",
+                        maxlength: "Maximum 255 characters allowed"
+                    },
+                    date: {
+                        required: "Date is required",
+                        date: "Please enter a valid date"
+                    },
+                    bank_name: {
+                        required: "Please select Cash/Bank"
+                    },
+                    from_to: {
+                        required: "Payment From is required",
+                        minlength: "Please enter at least 2 characters",
+                        maxlength: "Maximum 255 characters allowed"
+                    },
+                    description: {
+                        required: "Description is required",
+                        minlength: "Please enter at least 5 characters"
+                    },
+                    terbilang: {
+                        required: "Amount in words is required",
+                        minlength: "Please enter at least 5 characters"
+                    },
+                    reference_number: {
+                        maxlength: "Maximum 255 characters allowed"
+                    },
+                    total_amount: {
+                        required: "Total amount is required",
+                        number: "Please enter a valid amount",
+                        min: "Total amount must be greater than 0"
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    if (element.hasClass('bank-select')) {
+                        error.insertAfter(element.closest('.bank-group'));
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+                highlight: function(element) {
+                    $(element).addClass('error');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('error');
+                },
+                submitHandler: function(form) {
+                    // This will be handled by custom submit functions
+                    return false;
+                }
+            });
+
+            // Add validation for account rows
+            addAccountRowValidation();
         }
 
-        // Action button functions
+        // Add validation rules for account rows
+        function addAccountRowValidation() {
+            $('.account-number-input').each(function() {
+                $(this).rules('add', {
+                    required: true,
+                    maxlength: 50,
+                    messages: {
+                        required: "Account number is required",
+                        maxlength: "Maximum 50 characters allowed"
+                    }
+                });
+            });
+
+            $('.account-name-input').each(function() {
+                $(this).rules('add', {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 255,
+                    messages: {
+                        required: "Account name is required",
+                        minlength: "Please enter at least 2 characters",
+                        maxlength: "Maximum 255 characters allowed"
+                    }
+                });
+            });
+
+            $('.amount-input').each(function() {
+                $(this).rules('add', {
+                    required: true,
+                    number: true,
+                    min: 0.01,
+                    messages: {
+                        required: "Amount is required",
+                        number: "Please enter a valid amount",
+                        min: "Amount must be greater than 0"
+                    }
+                });
+            });
+        }
+
+        // Update bank code based on selection
+        function updateBankCode() {
+            const bankSelect = $('#bankSelect');
+            const bankCode = $('#bankCode');
+            const selectedOption = bankSelect.find('option:selected');
+            
+            bankCode.val(selectedOption.data('code') || '');
+        }
+
+        // Add new account row
+        function addAccountRow() {
+            const tableBody = $('#accountTableBody');
+            const rowCount = tableBody.find('.account-row').length;
+            
+            const newRow = `
+                <tr class="account-row">
+                    <td>
+                        <input type="text" name="details[${rowCount}][account_number]" 
+                               placeholder="Account No." class="account-number-input" required>
+                    </td>
+                    <td>
+                        <input type="text" name="details[${rowCount}][account_name]" 
+                               placeholder="Account Name" class="account-name-input" required>
+                    </td>
+                    <td>
+                        <input type="number" name="details[${rowCount}][amount]" 
+                               placeholder="0" class="amount-input" step="0.01" min="0" required>
+                    </td>
+                    <td>
+                        <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `;
+            
+            tableBody.append(newRow);
+            
+            // Add validation for new inputs
+            addAccountRowValidation();
+            
+            // Focus on first input of new row
+            tableBody.find('.account-row:last .account-number-input').focus();
+        }
+
+        // Delete account row
+        function deleteAccountRow(button) {
+            const row = $(button).closest('.account-row');
+            const tableBody = $('#accountTableBody');
+            
+            // Don't allow deletion if it's the only row
+            if (tableBody.find('.account-row').length <= 1) {
+                showAlert('Cannot delete the last row', 'warning');
+                return;
+            }
+            
+            row.remove();
+            updateRowIndices();
+            calculateTotal();
+        }
+
+        // Update row indices after deletion
+        function updateRowIndices() {
+            $('#accountTableBody .account-row').each(function(index) {
+                $(this).find('input[name*="[account_number]"]').attr('name', `details[${index}][account_number]`);
+                $(this).find('input[name*="[account_name]"]').attr('name', `details[${index}][account_name]`);
+                $(this).find('input[name*="[amount]"]').attr('name', `details[${index}][amount]`);
+            });
+        }
+
+        // Calculate total amount
+        function calculateTotal() {
+            let total = 0;
+            
+            $('.amount-input').each(function() {
+                const value = parseFloat($(this).val()) || 0;
+                total += value;
+            });
+
+            // Update total display
+            $('#totalAmount').text(total.toLocaleString('id-ID'));
+            $('#totalAmountInput').val(total);
+        }
+
+                // Submit voucher
         function submitVoucher() {
-            if (confirm('Submit this voucher for approval?')) {
-                alert('Voucher submitted successfully!');
+            // Calculate total before validation
+            calculateTotal();
+            
+            if ($('#voucherForm').valid() && validateAccountRows()) {
+                // Ensure total amount is updated in hidden field
+                const totalAmount = parseFloat($('#totalAmountInput').val()) || 0;
+                
+                if (totalAmount <= 0) {
+                    showAlert('Total amount must be greater than 0.', 'warning');
+                    return;
+                }
+                
+                const formData = $('#voucherForm').serialize();
+                
+                // Show loading state
+                $('#submitBtn').prop('disabled', true).addClass('loading');
+                
+                $.ajax({
+                    url: $('#voucherForm').attr('action'),
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            showAlert(response.message || 'Voucher submitted successfully!', 'success');
+                            setTimeout(function() {
+                                if (response.redirect_url) {
+                                    window.location.href = response.redirect_url;
+                                } else {
+                                    // Redirect ke dashboard atau halaman index vouchers
+                                    window.location.href = "{{ route('dashboard') }}";
+                                }
+                            }, 2000);
+                        } else {
+                            showAlert(response.message || 'Failed to submit voucher.', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        let message = 'An error occurred while submitting the voucher.';
+                        
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            const errorMessages = [];
+                            
+                            // Handle validation errors
+                            Object.keys(errors).forEach(function(field) {
+                                if (Array.isArray(errors[field])) {
+                                    errorMessages.push(...errors[field]);
+                                } else {
+                                    errorMessages.push(errors[field]);
+                                }
+                            });
+                            
+                            message = errorMessages.join('<br>');
+                        }
+                        
+                        showAlert(message, 'error');
+                    },
+                    complete: function() {
+                        $('#submitBtn').prop('disabled', false).removeClass('loading');
+                    }
+                });
+            } else {
+                showAlert('Please fill in all required fields correctly.', 'warning');
             }
         }
 
-        // Auto-generate voucher number
+        // Validate account rows
+        function validateAccountRows() {
+            const rows = $('#accountTableBody .account-row');
+            let valid = true;
+            
+            if (rows.length === 0) {
+                showAlert('Please add at least one account row.', 'warning');
+                return false;
+            }
+            
+            rows.each(function() {
+                const accountNumber = $(this).find('.account-number-input').val().trim();
+                const accountName = $(this).find('.account-name-input').val().trim();
+                const amount = parseFloat($(this).find('.amount-input').val()) || 0;
+                
+                if (!accountNumber || !accountName || amount <= 0) {
+                    valid = false;
+                    return false;
+                }
+            });
+            
+            if (!valid) {
+                showAlert('All account rows must have valid account number, name, and amount greater than 0.', 'warning');
+            }
+            
+            return valid;
+        }
+
+        // Show alert messages
+        function showAlert(message, type = 'info') {
+            const alertClass = `alert-${type}`;
+            const alertHtml = `
+                <div class="alert ${alertClass}">
+                    ${message}
+                </div>
+            `;
+            
+            $('#alertContainer').html(alertHtml);
+            
+            // Auto hide after 5 seconds
+            setTimeout(function() {
+                $('#alertContainer').fadeOut(500, function() {
+                    $(this).empty().show();
+                });
+            }, 5000);
+        }
+
         function generateVoucherNumber() {
             const date = new Date();
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             
-            return `PV-3/${year}/${month}/${day}01`;
+            return `RV-3/${year}/${month}/${day}01`;
         }
-
-        // Set today's date on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateInput = document.querySelector('input[type="date"]');
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.value = today;
-        });
     </script>
 </body>
 </html>
