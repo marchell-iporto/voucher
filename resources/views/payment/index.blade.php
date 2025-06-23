@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +27,7 @@
             background: white;
             padding: 20px 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
@@ -90,38 +89,34 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        .btn.add {
+        .btn.add { 
             background: linear-gradient(135deg, #10b981, #059669);
         }
-
-        .btn.add:hover {
+        .btn.add:hover { 
             background: linear-gradient(135deg, #059669, #047857);
         }
 
-        .btn.edit {
+        .btn.edit { 
             background: linear-gradient(135deg, #f59e0b, #d97706);
         }
-
-        .btn.edit:hover {
+        .btn.edit:hover { 
             background: linear-gradient(135deg, #d97706, #b45309);
         }
 
-        .btn.submit {
+        .btn.submit { 
             background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
-
-        .btn.submit:hover {
+        .btn.submit:hover { 
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
         }
 
-        .btn.delete {
+        .btn.delete { 
             background: linear-gradient(135deg, #ef4444, #dc2626);
         }
-
-        .btn.delete:hover {
+        .btn.delete:hover { 
             background: linear-gradient(135deg, #dc2626, #b91c1c);
         }
 
@@ -130,7 +125,7 @@
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
         .header {
@@ -243,22 +238,32 @@
             padding: 8px 12px;
             border-radius: 6px;
             transition: all 0.3s ease;
+            background-color: #f9fafb;
+            color: #6b7280;
+            font-weight: 600;
         }
 
         .bank-select {
-            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-            border: 1px solid #3b82f6;
-            padding: 8px 10px;
-            font-size: 12px;
-            color: #1e40af;
-            font-weight: 600;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
             border-radius: 6px;
             cursor: pointer;
-            width: 80px;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .bank-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
         }
 
         .bank-select:hover {
-            background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+            border-color: #94a3b8;
         }
 
         .account-section {
@@ -271,7 +276,7 @@
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .account-table th,
@@ -430,8 +435,7 @@
                 gap: 8px;
             }
 
-            .bank-code,
-            .bank-select {
+            .bank-code, .bank-select {
                 width: 100%;
             }
 
@@ -467,7 +471,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="page-wrapper">
         <!-- Page Header with Actions -->
@@ -478,7 +481,7 @@
                 </a>
                 <h1>Payment Voucher</h1>
             </div>
-
+            
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <button class="btn submit" onclick="submitVoucher()">
@@ -527,14 +530,20 @@
                         <label class="form-label">Cash / Bank</label>
                         <span class="form-colon">:</span>
                         <div class="bank-group">
-                            <input type="text" class="bank-code" placeholder="Code">
-                            <select class="bank-select">
-                                <option value="">Select Bank</option>
-                                <option>Mandiri</option>
-                                <option>BCA</option>
-                                <option>BNI</option>
-                                <option>BRI</option>
-                                <option>CIMB</option>
+                            <input type="text" class="bank-code" id="bankCode" readonly placeholder="Code">
+                            <select class="bank-select" id="bankSelect" onchange="updateBankCode()">
+                                <option value="">Select Cash/Bank</option>
+                                <option value="10001">Cash</option>
+                                <option value="10101">Bank Mandiri</option>
+                                <option value="10102">Bank BCA</option>
+                                <option value="10103">Bank BNI</option>
+                                <option value="10104">Bank BRI</option>
+                                <option value="10105">Bank CIMB Niaga</option>
+                                <option value="10106">Bank Danamon</option>
+                                <option value="10107">Bank Permata</option>
+                                <option value="10108">Bank Maybank</option>
+                                <option value="10109">Bank OCBC NISP</option>
+                                <option value="10110">Bank Panin</option>
                             </select>
                         </div>
                     </div>
@@ -566,13 +575,9 @@
                         </thead>
                         <tbody id="accountTableBody">
                             <tr>
-                                <td><input type="text" placeholder="Account No."
-                                        style="border: none; width: 100%; background: transparent;"></td>
-                                <td><input type="text" placeholder="Account Name"
-                                        style="border: none; width: 100%; background: transparent;"></td>
-                                <td><input type="number" placeholder="0"
-                                        style="border: none; width: 100%; background: transparent; text-align: right;"
-                                        onchange="calculateTotal()"></td>
+                                <td><input type="text" placeholder="Account No." style="border: none; width: 100%; background: transparent;"></td>
+                                <td><input type="text" placeholder="Account Name" style="border: none; width: 100%; background: transparent;"></td>
+                                <td><input type="number" placeholder="0" style="border: none; width: 100%; background: transparent; text-align: right;" onchange="calculateTotal()"></td>
                             </tr>
                             <tr>
                                 <td></td>
@@ -597,8 +602,7 @@
                         <label class="total-label">Terbilang</label>
                         <span class="total-colon">:</span>
                         <div class="total-content">
-                            <input type="text" class="total-words-input"
-                                placeholder="Enter amount in words (e.g., Dua Ratus Juta Rupiah)" id="totalWordsInput">
+                            <input type="text" class="total-words-input" placeholder="Enter amount in words (e.g., Dua Ratus Juta Rupiah)" id="totalWordsInput">
                             <div class="total-amount">
                                 <span id="totalAmount">0</span>
                             </div>
@@ -610,6 +614,14 @@
     </div>
 
     <script>
+        // Function to update bank code based on selection
+        function updateBankCode() {
+            const bankSelect = document.getElementById('bankSelect');
+            const bankCode = document.getElementById('bankCode');
+            
+            bankCode.value = bankSelect.value;
+        }
+
         // Function to add new account row
         function addAccountRow() {
             const tableBody = document.getElementById('accountTableBody');
@@ -619,7 +631,7 @@
                 <td><input type="text" placeholder="Account Name" style="border: none; width: 100%; background: transparent;"></td>
                 <td><input type="number" placeholder="0" style="border: none; width: 100%; background: transparent; text-align: right;" onchange="calculateTotal()"></td>
             `;
-
+            
             // Insert before the last empty rows
             const emptyRows = tableBody.querySelectorAll('tr');
             const insertIndex = Math.max(0, emptyRows.length - 2);
@@ -630,7 +642,7 @@
         function calculateTotal() {
             const amounts = document.querySelectorAll('#accountTableBody input[type="number"]');
             let total = 0;
-
+            
             amounts.forEach(input => {
                 if (input.value) {
                     total += parseFloat(input.value);
@@ -654,7 +666,7 @@
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-
+            
             return `PV-3/${year}/${month}/${day}01`;
         }
 
@@ -666,5 +678,4 @@
         });
     </script>
 </body>
-
 </html>
