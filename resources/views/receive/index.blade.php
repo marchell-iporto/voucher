@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +28,7 @@
             background: white;
             padding: 20px 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
@@ -89,34 +90,38 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .btn.add { 
+        .btn.add {
             background: linear-gradient(135deg, #10b981, #059669);
         }
-        .btn.add:hover { 
+
+        .btn.add:hover {
             background: linear-gradient(135deg, #059669, #047857);
         }
 
-        .btn.edit { 
+        .btn.edit {
             background: linear-gradient(135deg, #f59e0b, #d97706);
         }
-        .btn.edit:hover { 
+
+        .btn.edit:hover {
             background: linear-gradient(135deg, #d97706, #b45309);
         }
 
-        .btn.submit { 
+        .btn.submit {
             background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
-        .btn.submit:hover { 
+
+        .btn.submit:hover {
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
         }
 
-        .btn.delete { 
+        .btn.delete {
             background: linear-gradient(135deg, #ef4444, #dc2626);
         }
-        .btn.delete:hover { 
+
+        .btn.delete:hover {
             background: linear-gradient(135deg, #dc2626, #b91c1c);
         }
 
@@ -125,7 +130,7 @@
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .header {
@@ -238,22 +243,38 @@
             padding: 8px 12px;
             border-radius: 6px;
             transition: all 0.3s ease;
+            background-color: #fff3cd !important;
+            /* Warna kuning terang */
+            color: #856404 !important;
+            /* Warna teks gelap */
+            font-weight: 700 !important;
+            /* Bold */
+            text-align: center;
+            border: 2px solid #ffc107 !important;
+            /* Border kuning */
         }
 
         .bank-select {
-            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-            border: 1px solid #3b82f6;
-            padding: 8px 10px;
-            font-size: 12px;
-            color: #1e40af;
-            font-weight: 600;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
             border-radius: 6px;
             cursor: pointer;
-            width: 80px;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .bank-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
         }
 
         .bank-select:hover {
-            background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+            border-color: #94a3b8;
         }
 
         .account-section {
@@ -266,7 +287,7 @@
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .account-table th,
@@ -425,7 +446,8 @@
                 gap: 8px;
             }
 
-            .bank-code, .bank-select {
+            .bank-code,
+            .bank-select {
                 width: 100%;
             }
 
@@ -461,17 +483,18 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page-wrapper">
         <!-- Page Header with Actions -->
         <div class="page-header">
             <div class="page-title">
                 <a href="{{ route('dashboard') }}" class="back-btn">
-                    ← Back to Dashboard
+                    ← Back to Dashboard Okay
                 </a>
                 <h1>Receive Voucher</h1>
             </div>
-            
+
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <button class="btn submit" onclick="submitVoucher()">
@@ -516,18 +539,25 @@
                     </div>
 
                     <!-- Cash / Bank -->
+                    <!-- GANTI BAGIAN INI DI WEB ANDA -->
                     <div class="form-field">
                         <label class="form-label">Cash / Bank</label>
                         <span class="form-colon">:</span>
                         <div class="bank-group">
-                            <input type="text" class="bank-code" placeholder="Code">
-                            <select class="bank-select">
-                                <option value="">Select Bank</option>
-                                <option>Mandiri</option>
-                                <option>BCA</option>
-                                <option>BNI</option>
-                                <option>BRI</option>
-                                <option>CIMB</option>
+                            <input type="text" class="bank-code" id="bankCode" readonly placeholder="Code" style="background-color: #fff3cd !important; color: #856404 !important; font-weight: 700 !important; border: 2px solid #ffc107 !important;">
+                            <select class="bank-select" id="bankSelect" onchange="updateBankCode()">
+                                <option value="">Select Cash/Bank</option>
+                                <option value="10001">Cash</option>
+                                <option value="10101">Bank Mandiri</option>
+                                <option value="10102">Bank BCA</option>
+                                <option value="10103">Bank BNI</option>
+                                <option value="10104">Bank BRI</option>
+                                <option value="10105">Bank CIMB Niaga</option>
+                                <option value="10106">Bank Danamon</option>
+                                <option value="10107">Bank Permata</option>
+                                <option value="10108">Bank Maybank</option>
+                                <option value="10109">Bank OCBC NISP</option>
+                                <option value="10110">Bank Panin</option>
                             </select>
                         </div>
                     </div>
@@ -584,7 +614,7 @@
                 <div class="total-section">
                     <div class="total-field">
                         <label class="total-label">Terbilang</label>
-                        <span class="total-colon">:</span>
+                        <span class="form-colon">:</span>
                         <div class="total-content">
                             <input type="text" class="total-words-input" placeholder="Enter amount in words (e.g., Dua Ratus Juta Rupiah)" id="totalWordsInput">
                             <div class="total-amount">
@@ -598,6 +628,88 @@
     </div>
 
     <script>
+        // Vanilla JavaScript version
+        function updateBankCode() {
+            console.log('updateBankCode called'); // Debug log
+            const bankSelect = document.getElementById('bankSelect');
+            const bankCode = document.getElementById('bankCode');
+
+            console.log('Selected value:', bankSelect.value); // Debug log
+
+            if (bankSelect && bankCode) {
+                bankCode.value = bankSelect.value;
+                console.log('Bank code updated to:', bankCode.value); // Debug log
+            } else {
+                console.error('Elements not found:', {
+                    bankSelect,
+                    bankCode
+                });
+            }
+        }
+
+        // jQuery version (if your site uses jQuery)
+        $(document).ready(function() {
+            $('#bankSelect').on('change', function() {
+                const selectedValue = $(this).val();
+                const selectedText = $(this).find('option:selected').text();
+                console.log('jQuery change event triggered, selected:', selectedValue, selectedText);
+
+                $('#bankCode').val(selectedValue);
+
+                // Force visual update with animation
+                $('#bankCode').css({
+                    'background-color': '#d4edda',
+                    'border-color': '#28a745',
+                    'transform': 'scale(1.05)'
+                }).delay(300).queue(function() {
+                    $(this).css({
+                        'background-color': '#fff3cd',
+                        'border-color': '#ffc107',
+                        'transform': 'scale(1)'
+                    }).dequeue();
+                });
+            });
+
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            $('input[type="date"]').val(today);
+        });
+
+        // Vanilla JavaScript fallback
+        document.addEventListener('DOMContentLoaded', function() {
+            const bankSelect = document.getElementById('bankSelect');
+            const bankCode = document.getElementById('bankCode');
+
+            if (bankSelect && bankCode) {
+                bankSelect.addEventListener('change', function() {
+                    const selectedValue = this.value;
+                    const selectedText = this.options[this.selectedIndex].text;
+                    console.log('Vanilla JS change event triggered, selected:', selectedValue, selectedText);
+
+                    bankCode.value = selectedValue;
+
+                    // Force visual update with animation
+                    bankCode.style.backgroundColor = '#d4edda';
+                    bankCode.style.borderColor = '#28a745';
+                    bankCode.style.transform = 'scale(1.05)';
+
+                    setTimeout(() => {
+                        bankCode.style.backgroundColor = '#fff3cd';
+                        bankCode.style.borderColor = '#ffc107';
+                        bankCode.style.transform = 'scale(1)';
+                    }, 300);
+                });
+            }
+
+            // Set today's date if jQuery didn't work
+            if (typeof $ === 'undefined') {
+                const dateInput = document.querySelector('input[type="date"]');
+                const today = new Date().toISOString().split('T')[0];
+                if (dateInput) dateInput.value = today;
+            }
+        });
+
+
         // Function to add new account row
         function addAccountRow() {
             const tableBody = document.getElementById('accountTableBody');
@@ -607,7 +719,7 @@
                 <td><input type="text" placeholder="Account Name" style="border: none; width: 100%; background: transparent;"></td>
                 <td><input type="number" placeholder="0" style="border: none; width: 100%; background: transparent; text-align: right;" onchange="calculateTotal()"></td>
             `;
-            
+
             // Insert before the last empty rows
             const emptyRows = tableBody.querySelectorAll('tr');
             const insertIndex = Math.max(0, emptyRows.length - 2);
@@ -618,7 +730,7 @@
         function calculateTotal() {
             const amounts = document.querySelectorAll('#accountTableBody input[type="number"]');
             let total = 0;
-            
+
             amounts.forEach(input => {
                 if (input.value) {
                     total += parseFloat(input.value);
@@ -629,7 +741,6 @@
             document.getElementById('totalAmount').textContent = total.toLocaleString('id-ID');
         }
 
-        // Action button functions
         function submitVoucher() {
             if (confirm('Submit this voucher for approval?')) {
                 alert('Voucher submitted successfully!');
@@ -642,16 +753,10 @@
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            
+
             return `RV-3/${year}/${month}/${day}01`;
         }
-
-        // Set today's date on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateInput = document.querySelector('input[type="date"]');
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.value = today;
-        });
     </script>
 </body>
+
 </html>
