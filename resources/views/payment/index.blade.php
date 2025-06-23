@@ -657,17 +657,9 @@
                                     <input type="text" name="bank_code" class="bank-code" id="bankCode" readonly placeholder="Code">
                                     <select name="bank_name" class="bank-select" id="bankSelect" required>
                                         <option value="">Select Cash/Bank</option>
-                                        <option value="Cash" data-code="10001">Cash</option>
-                                        <option value="Bank Mandiri" data-code="10101">Bank Mandiri</option>
-                                        <option value="Bank BCA" data-code="10102">Bank BCA</option>
-                                        <option value="Bank BNI" data-code="10103">Bank BNI</option>
-                                        <option value="Bank BRI" data-code="10104">Bank BRI</option>
-                                        <option value="Bank CIMB Niaga" data-code="10105">Bank CIMB Niaga</option>
-                                        <option value="Bank Danamon" data-code="10106">Bank Danamon</option>
-                                        <option value="Bank Permata" data-code="10107">Bank Permata</option>
-                                        <option value="Bank Maybank" data-code="10108">Bank Maybank</option>
-                                        <option value="Bank OCBC NISP" data-code="10109">Bank OCBC NISP</option>
-                                        <option value="Bank Panin" data-code="10110">Bank Panin</option>
+                                        <option value="Cash" data-code="1-10001">Cash</option>
+                                        <option value="Bank Mandiri" data-code="1-10002">Bank Mandiri</option>
+                                        <option value="Bank BNI" data-code="1-10003">Bank BNI</option>
                                     </select>
                                 </div>
                             </div>

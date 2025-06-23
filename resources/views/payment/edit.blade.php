@@ -673,17 +673,9 @@
                                            value="{{ $voucher->bank_code ?? '' }}" placeholder="Code">
                                     <select name="bank_name" class="bank-select" id="bankSelect" required>
                                         <option value="">Select Cash/Bank</option>
-                                        <option value="Cash" data-code="10001" {{ ($voucher->bank_name ?? '') == 'Cash' ? 'selected' : '' }}>Cash</option>
-                                        <option value="Bank Mandiri" data-code="10101" {{ ($voucher->bank_name ?? '') == 'Bank Mandiri' ? 'selected' : '' }}>Bank Mandiri</option>
-                                        <option value="Bank BCA" data-code="10102" {{ ($voucher->bank_name ?? '') == 'Bank BCA' ? 'selected' : '' }}>Bank BCA</option>
-                                        <option value="Bank BNI" data-code="10103" {{ ($voucher->bank_name ?? '') == 'Bank BNI' ? 'selected' : '' }}>Bank BNI</option>
-                                        <option value="Bank BRI" data-code="10104" {{ ($voucher->bank_name ?? '') == 'Bank BRI' ? 'selected' : '' }}>Bank BRI</option>
-                                        <option value="Bank CIMB Niaga" data-code="10105" {{ ($voucher->bank_name ?? '') == 'Bank CIMB Niaga' ? 'selected' : '' }}>Bank CIMB Niaga</option>
-                                        <option value="Bank Danamon" data-code="10106" {{ ($voucher->bank_name ?? '') == 'Bank Danamon' ? 'selected' : '' }}>Bank Danamon</option>
-                                        <option value="Bank Permata" data-code="10107" {{ ($voucher->bank_name ?? '') == 'Bank Permata' ? 'selected' : '' }}>Bank Permata</option>
-                                        <option value="Bank Maybank" data-code="10108" {{ ($voucher->bank_name ?? '') == 'Bank Maybank' ? 'selected' : '' }}>Bank Maybank</option>
-                                        <option value="Bank OCBC NISP" data-code="10109" {{ ($voucher->bank_name ?? '') == 'Bank OCBC NISP' ? 'selected' : '' }}>Bank OCBC NISP</option>
-                                        <option value="Bank Panin" data-code="10110" {{ ($voucher->bank_name ?? '') == 'Bank Panin' ? 'selected' : '' }}>Bank Panin</option>
+                                        <option value="Cash" data-code="1-10001" {{ ($voucher->bank_name ?? '') == 'Cash' ? 'selected' : '' }}>Cash</option>
+                                        <option value="Bank Mandiri" data-code="1-10002" {{ ($voucher->bank_name ?? '') == 'Bank Mandiri' ? 'selected' : '' }}>Bank Mandiri</option>
+                                        <option value="Bank BNI" data-code="1-10003" {{ ($voucher->bank_name ?? '') == 'Bank BNI' ? 'selected' : '' }}>Bank BNI</option>
                                     </select>
                                 </div>
                             </div>
