@@ -34,6 +34,6 @@ Route::post('receiveVoucher/store', [ReceiveVoucherController::class, 'store'])-
 
 
 Route::get('/paymentVoucher', [PaymentVoucherController::class, 'index'])->name('payment');
-Route::get('/payment-voucher/{id}/edit', [ReceiveVoucherController::class, 'edit'])->name('paymentvouchers.edit');
-Route::put('/payment-voucher/{id}', [ReceiveVoucherController::class, 'update'])->name('paymentvouchers.update');
-Route::post('paymentVoucher/store', [ReceiveVoucherController::class, 'store'])->name('payment.store');
+Route::get('/payment-voucher/{id}/edit', [PaymentVoucherController::class, 'edit'])->name('paymentvouchers.edit');
+Route::put('/payment-voucher/{id}', [PaymentVoucherController::class, 'update'])->name('paymentvouchers.update');
+Route::post('paymentVoucher/store', [PaymentVoucherController::class, 'store'])->name('payment.store');

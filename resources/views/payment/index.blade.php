@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Payment Voucher - PT EDVISOR PRIME SOLUTION</title>
-    
+
     <!-- jQuery and Validation Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
-    
+
     <style>
         * {
             margin: 0;
@@ -34,7 +35,7 @@
             background: white;
             padding: 20px 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
@@ -96,7 +97,7 @@
 
         .btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn:disabled {
@@ -104,10 +105,11 @@
             cursor: not-allowed;
         }
 
-        .btn.submit { 
+        .btn.submit {
             background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
-        .btn.submit:hover:not(:disabled) { 
+
+        .btn.submit:hover:not(:disabled) {
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
         }
 
@@ -116,7 +118,7 @@
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .header {
@@ -283,7 +285,7 @@
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .account-table th,
@@ -471,8 +473,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Success/Error Messages */
@@ -543,7 +550,8 @@
                 gap: 8px;
             }
 
-            .bank-code, .bank-select {
+            .bank-code,
+            .bank-select {
                 width: 100%;
             }
 
@@ -568,7 +576,8 @@
                 display: none;
             }
 
-            .add-row-btn, .delete-row-btn {
+            .add-row-btn,
+            .delete-row-btn {
                 display: none;
             }
 
@@ -579,6 +588,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page-wrapper">
         <!-- Page Header with Actions -->
@@ -589,7 +599,7 @@
                 </a>
                 <h1>Payment Voucher</h1>
             </div>
-            
+
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <button type="button" class="btn submit" id="submitBtn">
@@ -615,7 +625,7 @@
             <form id="voucherForm" method="POST" action="{{ route('payment.store') }}">
                 @csrf
                 <input type="hidden" name="type" value="payment">
-                
+
                 <div class="form-content">
                     <!-- Form Grid -->
                     <div class="form-grid">
@@ -625,7 +635,7 @@
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
                                 <input type="text" name="voucher_number" class="form-input" required
-                                       value="{{ $voucherNumber ?? '' }}" placeholder="Enter voucher number">
+                                    value="{{ $voucherNumber ?? '' }}" placeholder="Enter voucher number">
                             </div>
                         </div>
 
@@ -634,8 +644,8 @@
                             <label class="form-label">Referensi No.</label>
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
-                                <input type="text" name="reference_number" class="form-input" 
-                                       placeholder="Enter reference number">
+                                <input type="text" name="reference_number" class="form-input"
+                                    placeholder="Enter reference number">
                             </div>
                         </div>
 
@@ -654,7 +664,8 @@
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
                                 <div class="bank-group">
-                                    <input type="text" name="bank_code" class="bank-code" id="bankCode" readonly placeholder="Code">
+                                    <input type="text" name="bank_code" class="bank-code" id="bankCode" readonly
+                                        placeholder="Code">
                                     <select name="bank_name" class="bank-select" id="bankSelect" required>
                                         <option value="">Select Cash/Bank</option>
                                         <option value="Cash" data-code="1-10001">Cash</option>
@@ -670,8 +681,8 @@
                             <label class="form-label">Payment To</label>
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
-                                <input type="text" name="from_to" class="form-input" required 
-                                       placeholder="Enter name">
+                                <input type="text" name="from_to" class="form-input" required
+                                    placeholder="Enter name">
                             </div>
                         </div>
 
@@ -680,8 +691,8 @@
                             <label class="form-label">Description</label>
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
-                                <input type="text" name="description" class="form-input" required 
-                                       placeholder="Enter description">
+                                <input type="text" name="description" class="form-input" required
+                                    placeholder="Enter description">
                             </div>
                         </div>
                     </div>
@@ -698,26 +709,47 @@
                                 </tr>
                             </thead>
                             <tbody id="accountTableBody">
+                                @php
+                                    use App\Models\MasterVoucher;
+                                    $accounts = MasterVoucher::all();
+                                @endphp
+
                                 <tr class="account-row">
                                     <td>
-                                        <input type="text" name="details[0][account_number]" 
-                                               placeholder="Account No." class="account-number-input" required>
+                                        <select name="details[0][account_number]" class="account-number-select"
+                                            style="pointer-events: none; background-color: #f5f5f5;" required>
+                                            <option value="">-- Otomatis Terisi --</option>
+                                            @foreach ($accounts as $account)
+                                                <option value="{{ $account->nomor_akun }}">{{ $account->nomor_akun }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <input type="hidden" name="details[0][account_number]"
+                                            class="account-number-hidden">
                                     </td>
                                     <td>
-                                        <input type="text" name="details[0][account_name]" 
-                                               placeholder="Account Name" class="account-name-input" required>
+                                        <select name="details[0][account_name]" class="account-name-select"
+                                            onchange="updateAccountNumber(this)" required>
+                                            <option value="">-- Pilih Account Name --</option>
+                                            @foreach ($accounts as $account)
+                                                <option value="{{ $account->nama_akun }}"
+                                                    data-account-number="{{ $account->nomor_akun }}">
+                                                    {{ $account->nama_akun }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </td>
                                     <td>
-                                        <input type="number" name="details[0][amount]" 
-                                               placeholder="0" class="amount-input" step="0.01" min="0" required>
+                                        <input type="number" name="details[0][amount]" placeholder="0"
+                                            class="amount-input" step="0.01" min="0" required>
                                     </td>
                                     <td>
-                                        <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
-                                            🗑️
-                                        </button>
+                                        <button type="button" class="delete-row-btn"
+                                            onclick="deleteAccountRow(this)">🗑️</button>
                                     </td>
                                 </tr>
                             </tbody>
+
                         </table>
                         <button type="button" class="add-row-btn" onclick="addAccountRow()">
                             ➕ Add Account Row
@@ -731,8 +763,8 @@
                             <span class="total-colon">:</span>
                             <div class="total-content">
                                 <input type="text" name="terbilang" class="total-words-input" required
-                                       placeholder="Enter amount in words (e.g., Dua Ratus Juta Rupiah)" 
-                                       id="totalWordsInput">
+                                    placeholder="Enter amount in words (e.g., Dua Ratus Juta Rupiah)"
+                                    id="totalWordsInput">
                                 <div class="total-amount">
                                     Rp <span id="totalAmount">0</span>
                                     <input type="hidden" name="total_amount" id="totalAmountInput" value="0">
@@ -744,6 +776,9 @@
             </form>
         </div>
     </div>
+    <script>
+        const accounts = @json($accounts);
+    </script>
 
     <script>
         $(document).ready(function() {
@@ -909,7 +944,7 @@
             const bankSelect = $('#bankSelect');
             const bankCode = $('#bankCode');
             const selectedOption = bankSelect.find('option:selected');
-            
+
             bankCode.val(selectedOption.data('code') || '');
         }
 
@@ -917,49 +952,55 @@
         function addAccountRow() {
             const tableBody = $('#accountTableBody');
             const rowCount = tableBody.find('.account-row').length;
-            
-            const newRow = `
-                <tr class="account-row">
-                    <td>
-                        <input type="text" name="details[${rowCount}][account_number]" 
-                               placeholder="Account No." class="account-number-input" required>
-                    </td>
-                    <td>
-                        <input type="text" name="details[${rowCount}][account_name]" 
-                               placeholder="Account Name" class="account-name-input" required>
-                    </td>
-                    <td>
-                        <input type="number" name="details[${rowCount}][amount]" 
-                               placeholder="0" class="amount-input" step="0.01" min="0" required>
-                    </td>
-                    <td>
-                        <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
-                            🗑️
-                        </button>
-                    </td>
-                </tr>
-            `;
-            
+
+            const newRow = $(`
+        <tr class="account-row">
+            <td>
+                <!-- Hapus name dari select -->
+                <select class="account-number-select" 
+                        style="pointer-events: none; background-color: #f5f5f5;">
+                    <option value="">-- Otomatis Terisi --</option>
+                    ${accounts.map(account => 
+                        `<option value="${account.nomor_akun}">${account.nomor_akun}</option>`
+                    ).join('')}
+                </select>
+                <!-- Hidden input dengan index yang benar -->
+                <input type="hidden" name="details[${rowCount}][account_number]" class="account-number-hidden">
+            </td>
+            <td>
+                <select name="details[${rowCount}][account_name]" class="account-name-select" onchange="updateAccountNumber(this)" required>
+                    <option value="">-- Pilih Account Name --</option>
+                    ${accounts.map(account => 
+                        `<option value="${account.nama_akun}" data-account-number="${account.nomor_akun}">${account.nama_akun}</option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td>
+                <input type="number" name="details[${rowCount}][amount]" placeholder="0" class="amount-input" step="0.01" min="0" required>
+            </td>
+            <td>
+                <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">🗑️</button>
+            </td>
+        </tr>
+    `);
+
             tableBody.append(newRow);
-            
-            // Add validation for new inputs
             addAccountRowValidation();
-            
-            // Focus on first input of new row
-            tableBody.find('.account-row:last .account-number-input').focus();
+            newRow.find('.account-name-select').focus();
         }
+
 
         // Delete account row
         function deleteAccountRow(button) {
             const row = $(button).closest('.account-row');
             const tableBody = $('#accountTableBody');
-            
+
             // Don't allow deletion if it's the only row
             if (tableBody.find('.account-row').length <= 1) {
                 showAlert('Cannot delete the last row', 'warning');
                 return;
             }
-            
+
             row.remove();
             updateRowIndices();
             calculateTotal();
@@ -968,16 +1009,16 @@
         // Update row indices after deletion
         function updateRowIndices() {
             $('#accountTableBody .account-row').each(function(index) {
-                $(this).find('input[name*="[account_number]"]').attr('name', `details[${index}][account_number]`);
-                $(this).find('input[name*="[account_name]"]').attr('name', `details[${index}][account_name]`);
-                $(this).find('input[name*="[amount]"]').attr('name', `details[${index}][amount]`);
+                $(this).find('.account-number-hidden').attr('name', `details[${index}][account_number]`);
+                $(this).find('.account-name-select').attr('name', `details[${index}][account_name]`);
+                $(this).find('.amount-input').attr('name', `details[${index}][amount]`);
             });
         }
 
         // Calculate total amount
         function calculateTotal() {
             let total = 0;
-            
+
             $('.amount-input').each(function() {
                 const value = parseFloat($(this).val()) || 0;
                 total += value;
@@ -988,25 +1029,25 @@
             $('#totalAmountInput').val(total);
         }
 
-                // Submit voucher
+        // Submit voucher
         function submitVoucher() {
             // Calculate total before validation
             calculateTotal();
-            
+
             if ($('#voucherForm').valid() && validateAccountRows()) {
                 // Ensure total amount is updated in hidden field
                 const totalAmount = parseFloat($('#totalAmountInput').val()) || 0;
-                
+
                 if (totalAmount <= 0) {
                     showAlert('Total amount must be greater than 0.', 'warning');
                     return;
                 }
-                
+
                 const formData = $('#voucherForm').serialize();
-                
+
                 // Show loading state
                 $('#submitBtn').prop('disabled', true).addClass('loading');
-                
+
                 $.ajax({
                     url: $('#voucherForm').attr('action'),
                     method: 'POST',
@@ -1028,13 +1069,13 @@
                     },
                     error: function(xhr) {
                         let message = 'An error occurred while submitting the voucher.';
-                        
+
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             message = xhr.responseJSON.message;
                         } else if (xhr.responseJSON && xhr.responseJSON.errors) {
                             const errors = xhr.responseJSON.errors;
                             const errorMessages = [];
-                            
+
                             // Handle validation errors
                             Object.keys(errors).forEach(function(field) {
                                 if (Array.isArray(errors[field])) {
@@ -1043,10 +1084,10 @@
                                     errorMessages.push(errors[field]);
                                 }
                             });
-                            
+
                             message = errorMessages.join('<br>');
                         }
-                        
+
                         showAlert(message, 'error');
                     },
                     complete: function() {
@@ -1062,27 +1103,28 @@
         function validateAccountRows() {
             const rows = $('#accountTableBody .account-row');
             let valid = true;
-            
+
             if (rows.length === 0) {
                 showAlert('Please add at least one account row.', 'warning');
                 return false;
             }
-            
+
             rows.each(function() {
-                const accountNumber = $(this).find('.account-number-input').val().trim();
-                const accountName = $(this).find('.account-name-input').val().trim();
+                const accountNumber = $(this).find('.account-number-hidden').val()
+                    .trim(); // Ambil dari hidden input
+                const accountName = $(this).find('.account-name-select').val().trim();
                 const amount = parseFloat($(this).find('.amount-input').val()) || 0;
-                
+
                 if (!accountNumber || !accountName || amount <= 0) {
                     valid = false;
                     return false;
                 }
             });
-            
+
             if (!valid) {
                 showAlert('All account rows must have valid account number, name, and amount greater than 0.', 'warning');
             }
-            
+
             return valid;
         }
 
@@ -1094,9 +1136,9 @@
                     ${message}
                 </div>
             `;
-            
+
             $('#alertContainer').html(alertHtml);
-            
+
             // Auto hide after 5 seconds
             setTimeout(function() {
                 $('#alertContainer').fadeOut(500, function() {
@@ -1110,9 +1152,45 @@
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            
+
             return `RV-3/${year}/${month}/${day}01`;
         }
+
+        function updateAccountNumber(selectElement) {
+            const row = selectElement.closest('.account-row');
+            const accountNumberSelect = row.querySelector('.account-number-select');
+            const accountNumberHidden = row.querySelector('.account-number-hidden');
+
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+            if (selectedOption.value !== '') {
+                const accountNumber = selectedOption.getAttribute('data-account-number');
+
+                // Update select visual
+                accountNumberSelect.value = accountNumber;
+                // Update hidden input untuk form submit
+                accountNumberHidden.value = accountNumber;
+
+                accountNumberSelect.style.backgroundColor = '#e8f5e8';
+                setTimeout(() => {
+                    accountNumberSelect.style.backgroundColor = '#f5f5f5';
+                }, 1000);
+            } else {
+                accountNumberSelect.value = '';
+                accountNumberHidden.value = '';
+            }
+        }
+
+        // Alternatif menggunakan event delegation untuk dynamic rows
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('account-name-select')) {
+                updateAccountNumber(e.target);
+            }
+        });
+        $('form').on('submit', function() {
+            $('.account-number-select').prop('disabled', false);
+        });
     </script>
 </body>
+
 </html>

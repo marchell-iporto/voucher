@@ -595,8 +595,9 @@
                                     </td>
 
                                     <td class="action-buttons-cell">
-                                        <button class="action-btn edit-btn" onclick="editVoucher({{ $voucher->id }})"
-                                            title="Edit">
+                                        <button class="action-btn edit-btn" onclick="editVoucher(this)"
+                                            data-voucher-id="{{ $voucher->id }}"
+                                            data-voucher-type="{{ $voucher->type }}" title="Edit">
                                             ✏️
                                         </button>
                                         <button class="action-btn delete-btn"
@@ -678,10 +679,19 @@
             }, 500);
         }
 
-        // Edit voucher function
         // Simple and efficient edit function
-        function editVoucher(voucherId) {
-            window.location.href = `/receive-voucher/${voucherId}/edit`;
+        function editVoucher(element) {
+            const voucherId = element.getAttribute('data-voucher-id');
+            const voucherType = element.getAttribute('data-voucher-type');
+            console.log('Voucher Type', voucherType);
+
+            if (voucherType === 'receive') {
+                window.location.href = `/receive-voucher/${voucherId}/edit`;
+                console.log('Type', voucherType);
+            } else {
+                window.location.href = `/payment-voucher/${voucherId}/edit`;
+                console.log('Type', voucherType);
+            }
         }
         // Delete voucher function
         function deleteVoucher(voucherId, voucherNumber) {
