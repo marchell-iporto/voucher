@@ -709,14 +709,35 @@
                                 </tr>
                             </thead>
                             <tbody id="accountTableBody">
+                                @php
+                                    use App\Models\MasterVoucher;
+                                    $accounts = MasterVoucher::all();
+                                @endphp
+
                                 <tr class="account-row">
                                     <td>
-                                        <input type="text" name="details[0][account_number]"
-                                            placeholder="Account No." class="account-number-input" required>
+                                        <select name="details[0][account_number]" class="account-number-select"
+                                            style="pointer-events: none; background-color: #f5f5f5;" required>
+                                            <option value="">-- Otomatis Terisi --</option>
+                                            @foreach ($accounts as $account)
+                                                <option value="{{ $account->nomor_akun }}">{{ $account->nomor_akun }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <input type="hidden" name="details[0][account_number]"
+                                            class="account-number-hidden">
                                     </td>
                                     <td>
-                                        <input type="text" name="details[0][account_name]"
-                                            placeholder="Account Name" class="account-name-input" required>
+                                        <select name="details[0][account_name]" class="account-name-select"
+                                            onchange="updateAccountNumber(this)" required>
+                                            <option value="">-- Pilih Account Name --</option>
+                                            @foreach ($accounts as $account)
+                                                <option value="{{ $account->nama_akun }}"
+                                                    data-account-number="{{ $account->nomor_akun }}">
+                                                    {{ $account->nama_akun }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </td>
                                     <td>
                                         <input type="number" name="details[0][amount]" placeholder="0"
@@ -724,9 +745,7 @@
                                     </td>
                                     <td>
                                         <button type="button" class="delete-row-btn"
-                                            onclick="deleteAccountRow(this)">
-                                            🗑️
-                                        </button>
+                                            onclick="deleteAccountRow(this)">🗑️</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -756,6 +775,10 @@
             </form>
         </div>
     </div>
+
+    <script>
+        const accounts = @json($accounts);
+    </script>
 
     <script>
         $(document).ready(function() {
@@ -832,7 +855,7 @@
                         required: "Please select Cash/Bank"
                     },
                     from_to: {
-                        required: "Receive From is required",
+                        required: "Payment From is required",
                         minlength: "Please enter at least 2 characters",
                         maxlength: "Maximum 255 characters allowed"
                     },
@@ -930,36 +953,42 @@
             const tableBody = $('#accountTableBody');
             const rowCount = tableBody.find('.account-row').length;
 
-            const newRow = `
-                <tr class="account-row">
-                    <td>
-                        <input type="text" name="details[${rowCount}][account_number]" 
-                               placeholder="Account No." class="account-number-input" required>
-                    </td>
-                    <td>
-                        <input type="text" name="details[${rowCount}][account_name]" 
-                               placeholder="Account Name" class="account-name-input" required>
-                    </td>
-                    <td>
-                        <input type="number" name="details[${rowCount}][amount]" 
-                               placeholder="0" class="amount-input" step="0.01" min="0" required>
-                    </td>
-                    <td>
-                        <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
-                            🗑️
-                        </button>
-                    </td>
-                </tr>
-            `;
+            const newRow = $(`
+        <tr class="account-row">
+            <td>
+                <!-- Hapus name dari select -->
+                <select class="account-number-select" 
+                        style="pointer-events: none; background-color: #f5f5f5;">
+                    <option value="">-- Otomatis Terisi --</option>
+                    ${accounts.map(account => 
+                        `<option value="${account.nomor_akun}">${account.nomor_akun}</option>`
+                    ).join('')}
+                </select>
+                <!-- Hidden input dengan index yang benar -->
+                <input type="hidden" name="details[${rowCount}][account_number]" class="account-number-hidden">
+            </td>
+            <td>
+                <select name="details[${rowCount}][account_name]" class="account-name-select" onchange="updateAccountNumber(this)" required>
+                    <option value="">-- Pilih Account Name --</option>
+                    ${accounts.map(account => 
+                        `<option value="${account.nama_akun}" data-account-number="${account.nomor_akun}">${account.nama_akun}</option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td>
+                <input type="number" name="details[${rowCount}][amount]" placeholder="0" class="amount-input" step="0.01" min="0" required>
+            </td>
+            <td>
+                <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">🗑️</button>
+            </td>
+        </tr>
+    `);
 
             tableBody.append(newRow);
-
-            // Add validation for new inputs
             addAccountRowValidation();
-
-            // Focus on first input of new row
-            tableBody.find('.account-row:last .account-number-input').focus();
+            newRow.find('.account-name-select').focus();
         }
+
 
         // Delete account row
         function deleteAccountRow(button) {
@@ -980,9 +1009,9 @@
         // Update row indices after deletion
         function updateRowIndices() {
             $('#accountTableBody .account-row').each(function(index) {
-                $(this).find('input[name*="[account_number]"]').attr('name', `details[${index}][account_number]`);
-                $(this).find('input[name*="[account_name]"]').attr('name', `details[${index}][account_name]`);
-                $(this).find('input[name*="[amount]"]').attr('name', `details[${index}][amount]`);
+                $(this).find('.account-number-hidden').attr('name', `details[${index}][account_number]`);
+                $(this).find('.account-name-select').attr('name', `details[${index}][account_name]`);
+                $(this).find('.amount-input').attr('name', `details[${index}][amount]`);
             });
         }
 
@@ -1081,8 +1110,9 @@
             }
 
             rows.each(function() {
-                const accountNumber = $(this).find('.account-number-input').val().trim();
-                const accountName = $(this).find('.account-name-input').val().trim();
+                const accountNumber = $(this).find('.account-number-hidden').val()
+                    .trim(); // Ambil dari hidden input
+                const accountName = $(this).find('.account-name-select').val().trim();
                 const amount = parseFloat($(this).find('.amount-input').val()) || 0;
 
                 if (!accountNumber || !accountName || amount <= 0) {
@@ -1117,7 +1147,6 @@
             }, 5000);
         }
 
-        // Generate voucher number (if needed for receive voucher)
         function generateVoucherNumber() {
             const date = new Date();
             const year = date.getFullYear();
@@ -1126,6 +1155,41 @@
 
             return `RV-3/${year}/${month}/${day}01`;
         }
+
+        function updateAccountNumber(selectElement) {
+            const row = selectElement.closest('.account-row');
+            const accountNumberSelect = row.querySelector('.account-number-select');
+            const accountNumberHidden = row.querySelector('.account-number-hidden');
+
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+            if (selectedOption.value !== '') {
+                const accountNumber = selectedOption.getAttribute('data-account-number');
+
+                // Update select visual
+                accountNumberSelect.value = accountNumber;
+                // Update hidden input untuk form submit
+                accountNumberHidden.value = accountNumber;
+
+                accountNumberSelect.style.backgroundColor = '#e8f5e8';
+                setTimeout(() => {
+                    accountNumberSelect.style.backgroundColor = '#f5f5f5';
+                }, 1000);
+            } else {
+                accountNumberSelect.value = '';
+                accountNumberHidden.value = '';
+            }
+        }
+
+        // Alternatif menggunakan event delegation untuk dynamic rows
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('account-name-select')) {
+                updateAccountNumber(e.target);
+            }
+        });
+        $('form').on('submit', function() {
+            $('.account-number-select').prop('disabled', false);
+        });
     </script>
 </body>
 

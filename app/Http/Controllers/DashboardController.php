@@ -355,17 +355,26 @@ class DashboardController extends Controller
             $voucherDetail = VoucherDetail::findOrFail($id);
             $voucher = $voucherDetail->voucher;
             $detailInfo = $voucherDetail->account_number . ' - ' . $voucherDetail->account_name;
+            $voucherNumber = $voucher->voucher_number;
+            Log::info('Attempting to delete voucher detail', [
+                'detail_id' => $id,
+                'voucher_id' => $voucher->id,
+                'account_number' => $voucherDetail->account_number
+            ]);
 
             // Check if this is the last detail
             if ($voucher->details()->count() <= 1) {
+                $voucherDetail->delete();
+                $voucher->delete();
                 if (request()->expectsJson()) {
                     return response()->json([
-                        'success' => false,
-                        'message' => 'Cannot delete the last detail. At least one detail is required for a voucher.'
-                    ], 400);
+                        'success' => true,
+                        'message' => "Last detail deleted. Voucher {$voucherNumber} has been automatically deleted.",
+                        'voucher_deleted' => true
+                    ]);
                 }
 
-                return back()->withErrors(['error' => 'Cannot delete the last detail. At least one detail is required for a voucher.']);
+                return back()->with('success', "Last detail deleted. Voucher {$voucherNumber} has been automatically deleted.");
             }
 
             $voucherDetail->delete();
