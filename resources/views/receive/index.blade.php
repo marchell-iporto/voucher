@@ -11,6 +11,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+    !-- Include Select2 CSS dan JS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
         * {
@@ -585,6 +588,71 @@
                 box-shadow: none;
                 border: 1px solid #000;
             }
+
+            .select2-container {
+                width: 100% !important;
+            }
+
+            .select2-container .select2-selection--single {
+                height: 38px !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 6px !important;
+                padding: 8px 12px !important;
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 20px !important;
+                padding-left: 0 !important;
+                color: #374151 !important;
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 36px !important;
+                right: 8px !important;
+            }
+
+            .select2-dropdown {
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 6px !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .select2-search--dropdown .select2-search__field {
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 4px !important;
+                padding: 8px !important;
+            }
+
+            .select2-results__option {
+                padding: 8px 12px !important;
+                font-size: 14px !important;
+            }
+
+            .select2-results__option--highlighted {
+                background-color: #3b82f6 !important;
+            }
+
+            .select2-container--default .select2-selection--single:focus {
+                border-color: #3b82f6 !important;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+            }
+
+            /* Custom styling untuk readonly account number */
+            .account-number-display {
+                background-color: #f5f5f5 !important;
+                pointer-events: none !important;
+                color: #6b7280 !important;
+                font-weight: 600 !important;
+            }
+
+            .account-number-display .select2-selection__rendered {
+                color: #6b7280 !important;
+            }
+
+            /* Loading state */
+            .select2-container--default .select2-selection--single .select2-selection__placeholder {
+                color: #9ca3af !important;
+            }
         }
     </style>
 </head>
@@ -716,25 +784,27 @@
 
                                 <tr class="account-row">
                                     <td>
-                                        <select name="details[0][account_number]" class="account-number-select"
-                                            style="pointer-events: none; background-color: #f5f5f5;" required>
+                                        <!-- Account Number Display (Read-only) -->
+                                        <select class="account-number-select account-number-display" disabled>
                                             <option value="">-- Otomatis Terisi --</option>
                                             @foreach ($accounts as $account)
                                                 <option value="{{ $account->nomor_akun }}">{{ $account->nomor_akun }}
                                                 </option>
                                             @endforeach
                                         </select>
+                                        <!-- Hidden input untuk form submission -->
                                         <input type="hidden" name="details[0][account_number]"
                                             class="account-number-hidden">
                                     </td>
                                     <td>
-                                        <select name="details[0][account_name]" class="account-name-select"
-                                            onchange="updateAccountNumber(this)" required>
+                                        <!-- Searchable Account Name Dropdown -->
+                                        <select name="details[0][account_name]" class="account-name-select" required>
                                             <option value="">-- Pilih Account Name --</option>
                                             @foreach ($accounts as $account)
                                                 <option value="{{ $account->nama_akun }}"
-                                                    data-account-number="{{ $account->nomor_akun }}">
-                                                    {{ $account->nama_akun }}
+                                                    data-account-number="{{ $account->nomor_akun }}"
+                                                    data-search="{{ strtolower($account->nomor_akun . ' ' . $account->nama_akun) }}">
+                                                    {{ $account->nomor_akun }} - {{ $account->nama_akun }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -782,6 +852,7 @@
 
     <script>
         $(document).ready(function() {
+            initializeSelect2();
             // Set CSRF token for AJAX requests
             $.ajaxSetup({
                 headers: {
@@ -804,6 +875,91 @@
             // Initialize total calculation
             calculateTotal();
         });
+
+        function initializeSelect2() {
+            $('.account-name-select').select2({
+                placeholder: "-- Cari Account Name --",
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('.account-name-select').parent(),
+                templateResult: formatAccountOption,
+                templateSelection: formatAccountSelection,
+                matcher: customMatcher
+            });
+
+            // Event handler untuk perubahan account name
+            $('.account-name-select').on('select2:select', function(e) {
+                updateAccountNumber(this);
+            });
+
+            $('.account-name-select').on('select2:clear', function(e) {
+                const row = $(this).closest('.account-row');
+                const accountNumberSelect = row.find('.account-number-select');
+                const accountNumberHidden = row.find('.account-number-hidden');
+
+                accountNumberSelect.val('').trigger('change');
+                accountNumberHidden.val('');
+            });
+        }
+        // Format tampilan option di dropdown
+        function formatAccountOption(option) {
+            if (!option.id) {
+                return option.text;
+            }
+
+            const accountNumber = $(option.element).data('account-number');
+            if (!accountNumber) {
+                return option.text;
+            }
+
+            return $(`
+        <div class="account-option">
+            <div style="font-weight: 600; color: #3b82f6; font-size: 12px;">${accountNumber}</div>
+            <div style="color: #374151; font-size: 14px;">${option.text.split(' - ')[1] || option.text}</div>
+        </div>
+    `);
+        }
+
+        // Format tampilan selection yang dipilih
+        function formatAccountSelection(option) {
+            if (!option.id) {
+                return option.text;
+            }
+
+            const accountNumber = $(option.element).data('account-number');
+            if (!accountNumber) {
+                return option.text;
+            }
+
+            return `${accountNumber} - ${option.text.split(' - ')[1] || option.text}`;
+        }
+
+        function customMatcher(params, data) {
+            // Jika tidak ada search term, tampilkan semua
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+
+            // Jika tidak ada children, ini adalah option leaf
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+
+            // Search term
+            const term = params.term.toLowerCase();
+
+            // Ambil data search dari data attribute
+            const searchData = $(data.element).data('search') || '';
+            const text = data.text.toLowerCase();
+
+            // Cari di nomor akun dan nama akun
+            if (text.indexOf(term) > -1 || searchData.indexOf(term) > -1) {
+                return data;
+            }
+
+            return null;
+        }
+
 
         // Initialize jQuery Validation
         function initializeValidation() {
@@ -956,27 +1112,29 @@
             const newRow = $(`
         <tr class="account-row">
             <td>
-                <!-- Hapus name dari select -->
-                <select class="account-number-select" 
-                        style="pointer-events: none; background-color: #f5f5f5;">
+                <select class="account-number-select account-number-display" disabled>
                     <option value="">-- Otomatis Terisi --</option>
-                    ${accounts.map(account => 
-                        `<option value="${account.nomor_akun}">${account.nomor_akun}</option>`
-                    ).join('')}
+                    @foreach ($accounts as $account)
+                        <option value="{{ $account->nomor_akun }}">{{ $account->nomor_akun }}</option>
+                    @endforeach
                 </select>
-                <!-- Hidden input dengan index yang benar -->
                 <input type="hidden" name="details[${rowCount}][account_number]" class="account-number-hidden">
             </td>
             <td>
-                <select name="details[${rowCount}][account_name]" class="account-name-select" onchange="updateAccountNumber(this)" required>
+                <select name="details[${rowCount}][account_name]" class="account-name-select" required>
                     <option value="">-- Pilih Account Name --</option>
-                    ${accounts.map(account => 
-                        `<option value="${account.nama_akun}" data-account-number="${account.nomor_akun}">${account.nama_akun}</option>`
-                    ).join('')}
+                    @foreach ($accounts as $account)
+                        <option value="{{ $account->nama_akun }}" 
+                                data-account-number="{{ $account->nomor_akun }}"
+                                data-search="{{ strtolower($account->nomor_akun . ' ' . $account->nama_akun) }}">
+                            {{ $account->nomor_akun }} - {{ $account->nama_akun }}
+                        </option>
+                    @endforeach
                 </select>
             </td>
             <td>
-                <input type="number" name="details[${rowCount}][amount]" placeholder="0" class="amount-input" step="0.01" min="0" required>
+                <input type="number" name="details[${rowCount}][amount]" placeholder="0" 
+                       class="amount-input" step="0.01" min="0" required>
             </td>
             <td>
                 <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">🗑️</button>
@@ -985,8 +1143,39 @@
     `);
 
             tableBody.append(newRow);
-            addAccountRowValidation();
-            newRow.find('.account-name-select').focus();
+
+            // Initialize Select2 untuk row baru
+            newRow.find('.account-name-select').select2({
+                placeholder: "-- Cari Account Name --",
+                allowClear: true,
+                width: '100%',
+                dropdownParent: newRow.find('.account-name-select').parent(),
+                templateResult: formatAccountOption,
+                templateSelection: formatAccountSelection,
+                matcher: customMatcher
+            });
+
+            // Event handler untuk row baru
+            newRow.find('.account-name-select').on('select2:select', function(e) {
+                updateAccountNumber(this);
+            });
+
+            newRow.find('.account-name-select').on('select2:clear', function(e) {
+                const row = $(this).closest('.account-row');
+                const accountNumberSelect = row.find('.account-number-select');
+                const accountNumberHidden = row.find('.account-number-hidden');
+
+                accountNumberSelect.val('');
+                accountNumberHidden.val('');
+            });
+
+            // Focus ke dropdown baru
+            newRow.find('.account-name-select').select2('open');
+
+            // Add validation untuk row baru
+            if (typeof addAccountRowValidation === 'function') {
+                addAccountRowValidation();
+            }
         }
 
 
@@ -1157,27 +1346,28 @@
         }
 
         function updateAccountNumber(selectElement) {
-            const row = selectElement.closest('.account-row');
-            const accountNumberSelect = row.querySelector('.account-number-select');
-            const accountNumberHidden = row.querySelector('.account-number-hidden');
+            const row = $(selectElement).closest('.account-row');
+            const accountNumberSelect = row.find('.account-number-select');
+            const accountNumberHidden = row.find('.account-number-hidden');
 
-            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const selectedOption = $(selectElement).find('option:selected');
 
-            if (selectedOption.value !== '') {
-                const accountNumber = selectedOption.getAttribute('data-account-number');
+            if (selectedOption.val() !== '') {
+                const accountNumber = selectedOption.data('account-number');
 
-                // Update select visual
-                accountNumberSelect.value = accountNumber;
+                // Update visual select
+                accountNumberSelect.val(accountNumber);
                 // Update hidden input untuk form submit
-                accountNumberHidden.value = accountNumber;
+                accountNumberHidden.val(accountNumber);
 
-                accountNumberSelect.style.backgroundColor = '#e8f5e8';
+                // Visual feedback
+                accountNumberSelect.css('background-color', '#e8f5e8');
                 setTimeout(() => {
-                    accountNumberSelect.style.backgroundColor = '#f5f5f5';
+                    accountNumberSelect.css('background-color', '#f5f5f5');
                 }, 1000);
             } else {
-                accountNumberSelect.value = '';
-                accountNumberHidden.value = '';
+                accountNumberSelect.val('');
+                accountNumberHidden.val('');
             }
         }
 
@@ -1190,6 +1380,48 @@
         $('form').on('submit', function() {
             $('.account-number-select').prop('disabled', false);
         });
+
+        function addNativeSearchDropdown() {
+            $('.account-name-select').each(function() {
+                const select = this;
+                const wrapper = $('<div class="custom-select-wrapper"></div>');
+                const input = $('<input type="text" class="custom-select-input" placeholder="Cari account..." />');
+                const dropdown = $('<div class="custom-select-dropdown"></div>');
+
+                // Populate dropdown
+                $(select).find('option').each(function() {
+                    if (this.value) {
+                        const item = $(
+                            `<div class="custom-select-item" data-value="${this.value}">${this.text}</div>`
+                            );
+                        dropdown.append(item);
+                    }
+                });
+
+                // Wrap and insert
+                $(select).hide();
+                $(select).after(wrapper);
+                wrapper.append(input).append(dropdown);
+
+                // Search functionality
+                input.on('input', function() {
+                    const term = this.value.toLowerCase();
+                    dropdown.find('.custom-select-item').each(function() {
+                        const text = $(this).text().toLowerCase();
+                        $(this).toggle(text.includes(term));
+                    });
+                });
+
+                // Selection
+                dropdown.on('click', '.custom-select-item', function() {
+                    const value = $(this).data('value');
+                    const text = $(this).text();
+                    input.val(text);
+                    $(select).val(value).trigger('change');
+                    dropdown.hide();
+                });
+            });
+        }
     </script>
 </body>
 
