@@ -11,6 +11,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+    
+    <!-- Select2 CSS & JS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
         * {
@@ -302,6 +306,7 @@
             padding: 12px 16px;
             text-align: left;
             font-size: 14px;
+            vertical-align: middle;
         }
 
         .account-table th {
@@ -320,29 +325,38 @@
             font-family: 'Courier New', monospace;
         }
 
-        .account-table input {
-            border: none;
+        .account-table input[type="text"] {
+            border: 1px solid #e2e8f0;
             width: 100%;
-            background: transparent;
+            background: #f9fafb;
             outline: none;
-            padding: 4px;
+            padding: 8px 12px;
             font-size: 14px;
+            border-radius: 4px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .account-table input[type="number"] {
+            border: 1px solid #e2e8f0;
+            width: 100%;
+            background: white;
+            outline: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
         }
 
         .account-table input:focus {
-            background: #f8fafc;
-            border-radius: 4px;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
         }
 
         .account-table input.error {
             background: #fef2f2;
             border: 1px solid #ef4444;
-            border-radius: 4px;
-        }
-
-        .account-table .amount-input {
-            text-align: right;
-            font-family: 'Courier New', monospace;
         }
 
         .add-row-btn {
@@ -371,16 +385,17 @@
             background: #ef4444;
             color: white;
             border: none;
-            padding: 4px 8px;
+            padding: 6px 12px;
             font-size: 12px;
             cursor: pointer;
             border-radius: 4px;
             font-weight: 600;
-            margin-left: 8px;
+            transition: all 0.3s ease;
         }
 
         .delete-row-btn:hover {
             background: #dc2626;
+            transform: translateY(-1px);
         }
 
         .total-section {
@@ -448,6 +463,57 @@
             font-family: 'Courier New', monospace;
             min-width: 150px;
             text-align: right;
+        }
+
+        /* Select2 Custom Styles untuk Table */
+        .account-table .select2-container {
+            width: 100% !important;
+        }
+
+        .account-table .select2-container--default .select2-selection--single {
+            height: 40px !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 4px !important;
+            padding: 0 !important;
+        }
+
+        .account-table .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px !important;
+            padding-left: 12px !important;
+            font-size: 14px !important;
+            color: #374151 !important;
+        }
+
+        .account-table .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 38px !important;
+            right: 8px !important;
+        }
+
+        .account-table .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .select2-dropdown {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 6px !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        .select2-results__option {
+            font-size: 14px !important;
+            padding: 8px 12px !important;
+        }
+
+        .select2-results__option--highlighted {
+            background-color: #3b82f6 !important;
+        }
+
+        .select2-search__field {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 4px !important;
+            padding: 8px 12px !important;
+            font-size: 14px !important;
         }
 
         /* Validation Error Messages */
@@ -572,6 +638,15 @@
             .total-amount {
                 text-align: center;
             }
+
+            .account-table {
+                font-size: 12px;
+            }
+
+            .account-table th,
+            .account-table td {
+                padding: 8px;
+            }
         }
 
         @media print {
@@ -630,7 +705,7 @@
             </div>
 
             <!-- Form Title -->
-            <div class="form-title">EDIT Payment VOUCHER</div>
+            <div class="form-title">EDIT PAYMENT VOUCHER</div>
 
             <!-- Form Content -->
             <form id="voucherForm" method="POST">
@@ -696,8 +771,9 @@
                             </div>
                         </div>
 
+                        <!-- Payment From -->
                         <div class="form-field full-width">
-                            <label class="form-label">Payment From</label>
+                            <label class="form-label">Payment To</label>
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
                                 <input type="text" name="from_to" class="form-input" required
@@ -716,8 +792,7 @@
                         </div>
                     </div>
 
-                    <!-- Account Table -->
-                    <!-- Account Table Section yang sudah disesuaikan -->
+                    <!-- Account Table dengan Select2 -->
                     <div class="account-section">
                         <table class="account-table">
                             <thead>
@@ -732,6 +807,20 @@
                                 @php
                                     use App\Models\MasterVoucher;
                                     $accounts = MasterVoucher::all();
+                                    
+                                    // Fallback data jika database kosong
+                                    if ($accounts->isEmpty()) {
+                                        $accounts = collect([
+                                            (object)['nomor_akun' => '1-10001', 'nama_akun' => 'Cash'],
+                                            (object)['nomor_akun' => '1-10002', 'nama_akun' => 'Bank Mandiri'],
+                                            (object)['nomor_akun' => '1-10003', 'nama_akun' => 'Bank BNI'],
+                                            (object)['nomor_akun' => '2-20001', 'nama_akun' => 'Accounts Receivable'],
+                                            (object)['nomor_akun' => '3-30001', 'nama_akun' => 'Inventory'],
+                                            (object)['nomor_akun' => '4-40001', 'nama_akun' => 'Sales Revenue'],
+                                            (object)['nomor_akun' => '5-50001', 'nama_akun' => 'Office Expense'],
+                                            (object)['nomor_akun' => '5-50002', 'nama_akun' => 'Marketing Expense']
+                                        ]);
+                                    }
                                 @endphp
 
                                 @if (isset($voucher) && $voucher->details && $voucher->details->count() > 0)
@@ -740,33 +829,24 @@
                                             <td>
                                                 <input type="hidden" name="details[{{ $index }}][id]"
                                                     value="{{ $detail->id }}">
-                                                <!-- Hapus name dari select display -->
-                                                <select class="account-number-select"
-                                                    style="pointer-events: none; background-color: #f5f5f5;">
-                                                    <option value="">-- Otomatis Terisi --</option>
-                                                    @foreach ($accounts as $account)
-                                                        <option value="{{ $account->nomor_akun }}"
-                                                            {{ $detail->account_number == $account->nomor_akun ? 'selected' : '' }}>
-                                                            {{ $account->nomor_akun }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                <!-- Hidden input untuk dikirim ke server -->
-                                                <input type="hidden"
-                                                    name="details[{{ $index }}][account_number]"
-                                                    class="account-number-hidden"
-                                                    value="{{ $detail->account_number }}">
+                                                <!-- Account Number Display (Read-only) -->
+                                                <input type="text" class="account-number-display"
+                                                    value="{{ $detail->account_number }}" readonly>
+                                                <!-- Hidden input untuk form submission -->
+                                                <input type="hidden" name="details[{{ $index }}][account_number]"
+                                                    class="account-number-hidden" value="{{ $detail->account_number }}">
                                             </td>
                                             <td>
+                                                <!-- Select2 Account Name Dropdown -->
                                                 <select name="details[{{ $index }}][account_name]"
-                                                    class="account-name-select" onchange="updateAccountNumber(this)"
-                                                    required>
+                                                    class="account-name-select" required>
                                                     <option value="">-- Pilih Account Name --</option>
                                                     @foreach ($accounts as $account)
                                                         <option value="{{ $account->nama_akun }}"
                                                             data-account-number="{{ $account->nomor_akun }}"
+                                                            data-search="{{ strtolower($account->nomor_akun . ' ' . $account->nama_akun) }}"
                                                             {{ $detail->account_name == $account->nama_akun ? 'selected' : '' }}>
-                                                            {{ $account->nama_akun }}
+                                                            {{ $account->nomor_akun }} - {{ $account->nama_akun }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -778,37 +858,32 @@
                                             </td>
                                             <td>
                                                 <button type="button" class="delete-row-btn"
-                                                    onclick="deleteAccountRow(this)">
-                                                    🗑️
-                                                </button>
+                                                    onclick="deleteAccountRow(this)">🗑️</button>
                                             </td>
                                         </tr>
                                     @endforeach
                                 @else
                                     <tr class="account-row">
                                         <td>
+                                    <tr class="account-row">
+                                        <td>
                                             <input type="hidden" name="details[0][id]" value="">
-                                            <!-- Hapus name dari select display -->
-                                            <select class="account-number-select"
-                                                style="pointer-events: none; background-color: #f5f5f5;">
-                                                <option value="">-- Otomatis Terisi --</option>
-                                                @foreach ($accounts as $account)
-                                                    <option value="{{ $account->nomor_akun }}">
-                                                        {{ $account->nomor_akun }}</option>
-                                                @endforeach
-                                            </select>
-                                            <!-- Hidden input untuk dikirim ke server -->
+                                            <!-- Account Number Display (Read-only) -->
+                                            <input type="text" class="account-number-display"
+                                                placeholder="-- Otomatis Terisi --" readonly>
+                                            <!-- Hidden input untuk form submission -->
                                             <input type="hidden" name="details[0][account_number]"
                                                 class="account-number-hidden">
                                         </td>
                                         <td>
-                                            <select name="details[0][account_name]" class="account-name-select"
-                                                onchange="updateAccountNumber(this)" required>
+                                            <!-- Select2 Account Name Dropdown -->
+                                            <select name="details[0][account_name]" class="account-name-select" required>
                                                 <option value="">-- Pilih Account Name --</option>
                                                 @foreach ($accounts as $account)
                                                     <option value="{{ $account->nama_akun }}"
-                                                        data-account-number="{{ $account->nomor_akun }}">
-                                                        {{ $account->nama_akun }}
+                                                        data-account-number="{{ $account->nomor_akun }}"
+                                                        data-search="{{ strtolower($account->nomor_akun . ' ' . $account->nama_akun) }}">
+                                                        {{ $account->nomor_akun }} - {{ $account->nama_akun }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -819,9 +894,7 @@
                                         </td>
                                         <td>
                                             <button type="button" class="delete-row-btn"
-                                                onclick="deleteAccountRow(this)">
-                                                🗑️
-                                            </button>
+                                                onclick="deleteAccountRow(this)">🗑️</button>
                                         </td>
                                     </tr>
                                 @endif
@@ -831,7 +904,6 @@
                             ➕ Add Account Row
                         </button>
                     </div>
-
 
                     <!-- Total Section -->
                     <div class="total-section">
@@ -858,10 +930,39 @@
     </div>
 
     <script>
-        // Tambahkan data accounts untuk JavaScript
-        const accounts = @json($accounts);
+        // Data accounts untuk JavaScript dengan fallback yang robust
+        let accounts = [];
+        
+        try {
+            accounts = @json($accounts ?? []);
+            console.log('✅ Accounts loaded from backend:', accounts);
+            console.log('📊 Total accounts available:', accounts.length);
+            
+            if (accounts.length > 0) {
+                console.log('🔍 Sample accounts:', accounts.slice(0, 3));
+            }
+        } catch (e) {
+            console.error('❌ Error loading accounts from backend:', e);
+        }
+
+        // Jika masih kosong, gunakan hardcoded fallback
+        if (!accounts || accounts.length === 0) {
+            console.warn('⚠️ Using fallback accounts data');
+            accounts = [
+                {nomor_akun: '1-10001', nama_akun: 'Cash'},
+                {nomor_akun: '1-10002', nama_akun: 'Bank Mandiri'},
+                {nomor_akun: '1-10003', nama_akun: 'Bank BNI'},
+                {nomor_akun: '2-20001', nama_akun: 'Accounts Receivable'},
+                {nomor_akun: '3-30001', nama_akun: 'Inventory'},
+                {nomor_akun: '4-40001', nama_akun: 'Sales Revenue'},
+                {nomor_akun: '5-50001', nama_akun: 'Office Expense'},
+                {nomor_akun: '5-50002', nama_akun: 'Marketing Expense'}
+            ];
+        }
 
         $(document).ready(function() {
+            console.log('🚀 Document ready - initializing form');
+            
             // Set CSRF token for AJAX requests
             $.ajaxSetup({
                 headers: {
@@ -869,21 +970,284 @@
                 }
             });
 
+            // Debug existing data
+            console.log('🔍 Checking existing form data...');
+            $('.account-row').each(function(index) {
+                const accountNumber = $(this).find('.account-number-display').val();
+                const accountName = $(this).find('.account-name-select').val();
+                const amount = $(this).find('.amount-input').val();
+                
+                console.log(`Row ${index + 1}:`, {
+                    accountNumber: accountNumber,
+                    accountName: accountName,
+                    amount: amount
+                });
+            });
+
+            // Force rebuild options dan mapping
+            rebuildAllSelectOptions();
+
+            // Initialize Select2
+            initializeSelect2();
+
             // Initialize form validation
             initializeValidation();
 
             // Event handlers
             $('#bankSelect').on('change', updateBankCode);
             $(document).on('input', '.amount-input', calculateTotal);
+            $(document).on('change', '.account-name-select', updateAccountNumber);
             $('#updateBtn').on('click', updateVoucher);
 
             // Initialize calculations
             calculateTotal();
             updateBankCode();
 
-            // Debug log
-            console.log('Form initialized. Voucher ID:', $('input[name="voucher_id"]').val());
+            // Auto-fix account mappings after delay
+
+
+            console.log('✅ Form initialization completed');
         });
+
+        // Function untuk rebuild semua select options
+        function rebuildAllSelectOptions() {
+            console.log('🔧 Rebuilding all select options...');
+            
+            $('.account-name-select').each(function() {
+                const $select = $(this);
+                const currentValue = $select.val();
+                const row = $select.closest('.account-row');
+                const accountNumber = row.find('.account-number-display').val();
+                
+                console.log(`   Rebuilding select: ${$select.attr('name')}`);
+                console.log(`   Current value: "${currentValue}"`);
+                console.log(`   Account number: "${accountNumber}"`);
+                
+                // Keep only placeholder option
+                $select.find('option:not(:first)').remove();
+                
+                // Add accounts dari JavaScript
+                let optionsAdded = 0;
+                let matchedAccount = null;
+                
+                accounts.forEach(function(account) {
+                    if (account.nama_akun && account.nomor_akun) {
+                        const isMatchedByNumber = accountNumber && account.nomor_akun === accountNumber;
+                        const isMatchedByName = currentValue === account.nama_akun;
+                        const isSelected = isMatchedByNumber || isMatchedByName;
+                        
+                        if (isMatchedByNumber) {
+                            matchedAccount = account;
+                            console.log(`   🎯 Found matching account: ${account.nomor_akun} - ${account.nama_akun}`);
+                        }
+                        
+                        const option = new Option(
+                            `${account.nomor_akun} - ${account.nama_akun}`,
+                            account.nama_akun,
+                            isSelected,
+                            isSelected
+                        );
+                        
+                        $(option).attr('data-account-number', account.nomor_akun);
+                        $(option).attr('data-search', (account.nomor_akun + ' ' + account.nama_akun).toLowerCase());
+                        $select.append(option);
+                        optionsAdded++;
+                    }
+                });
+                
+                // Auto-select matching account
+                if (matchedAccount && !currentValue) {
+                    $select.val(matchedAccount.nama_akun);
+                    console.log(`   🔄 Auto-selected: ${matchedAccount.nama_akun}`);
+                    row.find('.account-number-hidden').val(matchedAccount.nomor_akun);
+                }
+                
+                console.log(`   ✅ Added ${optionsAdded} options`);
+            });
+        }
+
+        // Initialize Select2 untuk semua account name selects
+        function initializeSelect2() {
+            console.log('🎨 Initializing Select2 for all selects...');
+            
+            $('.account-name-select').each(function(index) {
+                const $element = $(this);
+                console.log(`   Initializing Select2 for element ${index + 1}: ${$element.attr('name')}`);
+                initializeSelect2ForElement($element);
+            });
+        }
+
+        // Initialize Select2 untuk element tertentu
+        function initializeSelect2ForElement($element) {
+            // Destroy existing Select2 if exists
+            if ($element.hasClass('select2-hidden-accessible')) {
+                $element.select2('destroy');
+            }
+
+            const optionsCount = $element.find('option').length;
+            console.log(`   🔧 Select2 init: ${$element.attr('name')} (${optionsCount} options)`);
+
+            $element.select2({
+                placeholder: '-- Pilih Account Name --',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $element.closest('td'),
+                language: {
+                    noResults: function() {
+                        return "Tidak ada hasil ditemukan";
+                    },
+                    searching: function() {
+                        return "Mencari...";
+                    }
+                },
+                matcher: function(params, data) {
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+
+                    if (!data.id || data.id === '') {
+                        return null;
+                    }
+
+                    const searchData = $(data.element).data('search');
+                    if (searchData && searchData.indexOf(params.term.toLowerCase()) > -1) {
+                        return data;
+                    }
+
+                    if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                        return data;
+                    }
+
+                    return null;
+                }
+            });
+
+            console.log(`   ✅ Select2 initialized for: ${$element.attr('name')}`);
+        }
+
+        // Update account number ketika account name dipilih
+        function updateAccountNumber() {
+            const $select = $(this);
+            const selectedOption = $select.find('option:selected');
+            const accountNumber = selectedOption.data('account-number');
+            const row = $select.closest('.account-row');
+
+            console.log(`🔄 Account selected: ${selectedOption.text()} (${accountNumber})`);
+
+            // Update account number display dan hidden input
+            row.find('.account-number-display').val(accountNumber || '');
+            row.find('.account-number-hidden').val(accountNumber || '');
+
+            // Visual feedback
+            if (accountNumber) {
+                row.find('.account-number-display').css('background-color', '#e8f5e8');
+                setTimeout(() => {
+                    row.find('.account-number-display').css('background-color', '#f9fafb');
+                }, 1000);
+            }
+        }
+
+   
+        // Add new account row
+        function addAccountRow() {
+            const tableBody = $('#accountTableBody');
+            const rowCount = tableBody.find('.account-row').length;
+
+            console.log(`➕ Adding new row. Current count: ${rowCount}`);
+
+            if (accounts.length === 0) {
+                showAlert('Data accounts tidak tersedia. Silakan refresh halaman.', 'error');
+                return;
+            }
+
+            // Buat options untuk select
+            let accountOptions = '<option value="">-- Pilih Account Name --</option>';
+            accounts.forEach(function(account) {
+                if (account.nama_akun && account.nomor_akun) {
+                    accountOptions += `<option value="${account.nama_akun}" 
+                                             data-account-number="${account.nomor_akun}"
+                                             data-search="${(account.nomor_akun + ' ' + account.nama_akun).toLowerCase()}">
+                                        ${account.nomor_akun} - ${account.nama_akun}
+                                      </option>`;
+                }
+            });
+
+            const newRow = $(`
+                <tr class="account-row">
+                    <td>
+                        <input type="hidden" name="details[${rowCount}][id]" value="">
+                        <input type="text" class="account-number-display"
+                            placeholder="-- Otomatis Terisi --" readonly>
+                        <input type="hidden" name="details[${rowCount}][account_number]"
+                            class="account-number-hidden">
+                    </td>
+                    <td>
+                        <select name="details[${rowCount}][account_name]" class="account-name-select" required>
+                            ${accountOptions}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="details[${rowCount}][amount]" placeholder="0"
+                            class="amount-input" step="0.01" min="0" required>
+                    </td>
+                    <td>
+                        <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">🗑️</button>
+                    </td>
+                </tr>
+            `);
+
+            tableBody.append(newRow);
+
+            // Initialize Select2 untuk row baru
+            const newSelect = newRow.find('.account-name-select');
+            initializeSelect2ForElement(newSelect);
+
+            // Add validation untuk row baru
+            addAccountRowValidation();
+
+            // Focus pada select yang baru ditambahkan
+            setTimeout(() => {
+                newSelect.select2('open');
+            }, 100);
+
+            console.log(`✅ New row added with ${newSelect.find('option').length} options`);
+        }
+
+        // Delete account row
+        function deleteAccountRow(button) {
+            const row = $(button).closest('.account-row');
+            const tableBody = $('#accountTableBody');
+
+            if (tableBody.find('.account-row:visible').length <= 1) {
+                showAlert('Minimal harus ada satu baris account', 'warning');
+                return;
+            }
+
+            const detailId = row.find('input[name*="[id]"]').val();
+            if (detailId && detailId !== '') {
+                if (!confirm('Apakah Anda yakin ingin menghapus detail account ini?')) {
+                    return;
+                }
+                row.append(`<input type="hidden" name="deleted_details[]" value="${detailId}">`);
+                row.hide();
+            } else {
+                row.find('.account-name-select').select2('destroy');
+                row.remove();
+            }
+
+            updateRowIndices();
+            calculateTotal();
+        }
+
+        // Update row indices after deletion
+        function updateRowIndices() {
+            $('#accountTableBody .account-row:visible').each(function(index) {
+                $(this).find('input[name*="[id]"]').attr('name', `details[${index}][id]`);
+                $(this).find('.account-number-hidden').attr('name', `details[${index}][account_number]`);
+                $(this).find('.account-name-select').attr('name', `details[${index}][account_name]`);
+                $(this).find('.amount-input').attr('name', `details[${index}][amount]`);
+            });
+        }
 
         // Initialize jQuery Validation
         function initializeValidation() {
@@ -920,46 +1284,54 @@
                 },
                 messages: {
                     date: {
-                        required: "Date is required",
-                        date: "Please enter a valid date"
+                        required: "Tanggal wajib diisi",
+                        date: "Masukkan tanggal yang valid"
                     },
                     bank_name: {
-                        required: "Please select Cash/Bank"
+                        required: "Pilih Cash/Bank"
                     },
                     from_to: {
-                        required: "Payment From is required",
-                        minlength: "Please enter at least 2 characters",
-                        maxlength: "Maximum 255 characters allowed"
+                        required: "Payment From wajib diisi",
+                        minlength: "Minimal 2 karakter",
+                        maxlength: "Maksimal 255 karakter"
                     },
                     description: {
-                        required: "Description is required",
-                        minlength: "Please enter at least 5 characters"
+                        required: "Deskripsi wajib diisi",
+                        minlength: "Minimal 5 karakter"
                     },
                     terbilang: {
-                        required: "Amount in words is required",
-                        minlength: "Please enter at least 5 characters"
+                        required: "Terbilang wajib diisi",
+                        minlength: "Minimal 5 karakter"
                     },
                     reference_number: {
-                        maxlength: "Maximum 255 characters allowed"
+                        maxlength: "Maksimal 255 karakter"
                     },
                     total_amount: {
-                        required: "Total amount is required",
-                        number: "Please enter a valid amount",
-                        min: "Total amount must be greater than 0"
+                        required: "Total amount wajib diisi",
+                        number: "Masukkan angka yang valid",
+                        min: "Total harus lebih dari 0"
                     }
                 },
                 errorPlacement: function(error, element) {
                     if (element.hasClass('bank-select')) {
                         error.insertAfter(element.closest('.bank-group'));
+                    } else if (element.hasClass('select2-hidden-accessible')) {
+                        error.insertAfter(element.next('.select2-container'));
                     } else {
                         error.insertAfter(element);
                     }
                 },
                 highlight: function(element) {
                     $(element).addClass('error');
+                    if ($(element).hasClass('select2-hidden-accessible')) {
+                        $(element).next('.select2-container').find('.select2-selection').addClass('error');
+                    }
                 },
                 unhighlight: function(element) {
                     $(element).removeClass('error');
+                    if ($(element).hasClass('select2-hidden-accessible')) {
+                        $(element).next('.select2-container').find('.select2-selection').removeClass('error');
+                    }
                 },
                 submitHandler: function(form) {
                     return false;
@@ -974,7 +1346,7 @@
                 $(this).rules('add', {
                     required: true,
                     messages: {
-                        required: "Account name is required"
+                        required: "Nama account wajib dipilih"
                     }
                 });
             });
@@ -985,9 +1357,9 @@
                     number: true,
                     min: 0.01,
                     messages: {
-                        required: "Amount is required",
-                        number: "Please enter a valid amount",
-                        min: "Amount must be greater than 0"
+                        required: "Amount wajib diisi",
+                        number: "Masukkan angka yang valid",
+                        min: "Amount harus lebih dari 0"
                     }
                 });
             });
@@ -1003,123 +1375,6 @@
             bankCode.val(code);
         }
 
-        // Function untuk update account number berdasarkan nama akun
-        function updateAccountNumber(selectElement) {
-            const row = selectElement.closest('.account-row');
-            const accountNumberSelect = row.querySelector('.account-number-select');
-            const accountNumberHidden = row.querySelector('.account-number-hidden');
-
-            const selectedOption = selectElement.options[selectElement.selectedIndex];
-
-            if (selectedOption.value !== '') {
-                const accountNumber = selectedOption.getAttribute('data-account-number');
-
-                // Update select visual
-                accountNumberSelect.value = accountNumber;
-                // Update hidden input untuk form submit
-                accountNumberHidden.value = accountNumber;
-
-                accountNumberSelect.style.backgroundColor = '#e8f5e8';
-                setTimeout(() => {
-                    accountNumberSelect.style.backgroundColor = '#f5f5f5';
-                }, 1000);
-            } else {
-                accountNumberSelect.value = '';
-                accountNumberHidden.value = '';
-            }
-        }
-
-        // Event delegation untuk dynamic rows
-        document.addEventListener('change', function(e) {
-            if (e.target.classList.contains('account-name-select')) {
-                updateAccountNumber(e.target);
-            }
-        });
-
-        // Add new account row - PERBAIKAN
-        function addAccountRow() {
-            const tableBody = $('#accountTableBody');
-            const rowCount = tableBody.find('.account-row').length;
-
-            const newRow = $(`
-        <tr class="account-row">
-            <td>
-                <input type="hidden" name="details[${rowCount}][id]" value="">
-                <!-- Hapus name dari select -->
-                <select class="account-number-select" 
-                        style="pointer-events: none; background-color: #f5f5f5;">
-                    <option value="">-- Otomatis Terisi --</option>
-                    ${accounts.map(account => 
-                        `<option value="${account.nomor_akun}">${account.nomor_akun}</option>`
-                    ).join('')}
-                </select>
-                <!-- Hidden input dengan index yang benar -->
-                <input type="hidden" name="details[${rowCount}][account_number]" class="account-number-hidden">
-            </td>
-            <td>
-                <select name="details[${rowCount}][account_name]" class="account-name-select" onchange="updateAccountNumber(this)" required>
-                    <option value="">-- Pilih Account Name --</option>
-                    ${accounts.map(account => 
-                        `<option value="${account.nama_akun}" data-account-number="${account.nomor_akun}">${account.nama_akun}</option>`
-                    ).join('')}
-                </select>
-            </td>
-            <td>
-                <input type="number" name="details[${rowCount}][amount]" 
-                       placeholder="0" class="amount-input" step="0.01" min="0" required>
-            </td>
-            <td>
-                <button type="button" class="delete-row-btn" onclick="deleteAccountRow(this)">
-                    🗑️
-                </button>
-            </td>
-        </tr>
-    `);
-
-            tableBody.append(newRow);
-            addAccountRowValidation();
-            newRow.find('.account-name-select').focus();
-        }
-
-        // Delete account row
-        function deleteAccountRow(button) {
-            const row = $(button).closest('.account-row');
-            const tableBody = $('#accountTableBody');
-
-            if (tableBody.find('.account-row:visible').length <= 1) {
-                showAlert('Cannot delete the last row', 'warning');
-                return;
-            }
-
-            // Check if this is an existing detail (has ID)
-            const detailId = row.find('input[name*="[id]"]').val();
-            if (detailId && detailId !== '') {
-                if (!confirm('Are you sure you want to delete this account detail? This action cannot be undone.')) {
-                    return;
-                }
-
-                // Mark for deletion by adding a hidden field
-                row.append(`<input type="hidden" name="deleted_details[]" value="${detailId}">`);
-                row.hide();
-            } else {
-                // New row, just remove it
-                row.remove();
-            }
-
-            updateRowIndices();
-            calculateTotal();
-        }
-
-        // Update row indices after deletion - PERBAIKAN
-        function updateRowIndices() {
-            $('#accountTableBody .account-row:visible').each(function(index) {
-                $(this).find('input[name*="[id]"]').attr('name', `details[${index}][id]`);
-                $(this).find('.account-number-hidden').attr('name', `details[${index}][account_number]`);
-                $(this).find('.account-name-select').attr('name', `details[${index}][account_name]`);
-                $(this).find('.amount-input').attr('name', `details[${index}][amount]`);
-            });
-        }
-
         // Calculate total amount
         function calculateTotal() {
             let total = 0;
@@ -1129,91 +1384,62 @@
                 total += value;
             });
 
-            // Round to 2 decimal places to avoid floating point issues
             total = Math.round(total * 100) / 100;
 
-            // Update display
             $('#totalAmount').text(total.toLocaleString('id-ID'));
             $('#totalAmountInput').val(total);
         }
 
-        // Update voucher with proper URL handling
+        // Update voucher
         function updateVoucher() {
-            // Force calculate total
             calculateTotal();
 
-            // Get voucher ID
             const voucherId = $('input[name="voucher_id"]').val();
             if (!voucherId) {
-                showAlert('Voucher ID not found. Please refresh the page.', 'error');
+                showAlert('Voucher ID tidak ditemukan. Silakan refresh halaman.', 'error');
                 return;
             }
 
-            // Validate form
             if (!$('#voucherForm').valid() || !validateAccountRows()) {
-                showAlert('Please fix validation errors before submitting.', 'warning');
+                showAlert('Silakan perbaiki error validasi sebelum menyimpan.', 'warning');
                 return;
             }
 
-            // Build the correct URL for Laravel PUT route
             const updateUrl = `/payment-voucher/${voucherId}`;
-
-            // Manually build form data
             const formElement = document.getElementById('voucherForm');
             const formData = new FormData(formElement);
 
-            // Ensure total amount is properly formatted
             const total = parseFloat($('#totalAmountInput').val()) || 0;
             formData.set('total_amount', total.toString());
-
-            console.log('=== UPDATE REQUEST ===');
-            console.log('Voucher ID:', voucherId);
-            console.log('Update URL:', updateUrl);
-            console.log('Total Amount:', total);
-            console.log('Method Override:', formData.get('_method'));
 
             $('#updateBtn').prop('disabled', true).addClass('loading');
 
             $.ajax({
                 url: updateUrl,
-                method: 'POST', // Laravel uses POST with _method override
+                method: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    console.log('=== UPDATE SUCCESS ===', response);
                     if (response.success) {
-                        showAlert(response.message || 'Voucher updated successfully!', 'success');
+                        showAlert(response.message || 'Voucher berhasil diupdate!', 'success');
                         setTimeout(function() {
                             window.location.href = "{{ route('dashboard') }}";
                         }, 2000);
                     } else {
-                        showAlert(response.message || 'Failed to update voucher.', 'error');
+                        showAlert(response.message || 'Gagal mengupdate voucher.', 'error');
                     }
                 },
                 error: function(xhr) {
-                    console.log('=== UPDATE ERROR ===');
-                    console.log('Status:', xhr.status);
-                    console.log('Response:', xhr.responseJSON);
-
-                    let message = 'Update failed: ';
-
+                    let message = 'Update gagal: ';
                     if (xhr.status === 405) {
-                        message = 'Route method not allowed. Please check your Laravel routes.';
+                        message = 'Method tidak diizinkan. Silakan cek route Laravel.';
                     } else if (xhr.status === 404) {
-                        message = 'Voucher not found. It may have been deleted.';
+                        message = 'Voucher tidak ditemukan.';
                     } else if (xhr.responseJSON && xhr.responseJSON.message) {
                         message += xhr.responseJSON.message;
                     } else {
                         message += `HTTP ${xhr.status} error occurred.`;
-                    }
-
-                    if (xhr.responseJSON && xhr.responseJSON.errors) {
-                        const errors = xhr.responseJSON.errors;
-                        Object.keys(errors).forEach(function(field) {
-                            message += '\n' + field + ': ' + (Array.isArray(errors[field]) ? errors[
-                                field].join(', ') : errors[field]);
-                        });
                     }
 
                     showAlert(message, 'error');
@@ -1224,19 +1450,17 @@
             });
         }
 
-        // Delete entire voucher
+        // Delete voucher
         function deleteVoucher() {
             const voucherId = $('input[name="voucher_id"]').val();
             const voucherNumber = $('input[name="voucher_number"]').val();
 
             if (!voucherId) {
-                showAlert('Voucher ID not found. Please refresh the page.', 'error');
+                showAlert('Voucher ID tidak ditemukan.', 'error');
                 return;
             }
 
-            if (confirm(
-                    `Are you sure you want to DELETE voucher ${voucherNumber}?\n\nThis will permanently delete the entire voucher and all its details.\n\nThis action cannot be undone.`
-                    )) {
+            if (confirm(`Apakah Anda yakin ingin MENGHAPUS voucher ${voucherNumber}?\n\nTindakan ini tidak dapat dibatalkan.`)) {
                 const deleteUrl = `/dashboard/voucher/${voucherId}`;
 
                 $.ajax({
@@ -1249,11 +1473,11 @@
                                 window.location.href = "{{ route('dashboard') }}";
                             }, 2000);
                         } else {
-                            showAlert(response.message || 'Failed to delete voucher', 'error');
+                            showAlert(response.message || 'Gagal menghapus voucher', 'error');
                         }
                     },
                     error: function(xhr) {
-                        let message = 'Failed to delete voucher';
+                        let message = 'Gagal menghapus voucher';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             message = xhr.responseJSON.message;
                         }
@@ -1263,19 +1487,18 @@
             }
         }
 
-        // Validate account rows - PERBAIKAN
+        // Validate account rows
         function validateAccountRows() {
             const visibleRows = $('#accountTableBody .account-row:visible');
             let valid = true;
 
             if (visibleRows.length === 0) {
-                showAlert('Please add at least one account row.', 'warning');
+                showAlert('Minimal harus ada satu baris account.', 'warning');
                 return false;
             }
 
             visibleRows.each(function() {
-                const accountNumber = $(this).find('.account-number-hidden').val()
-            .trim(); // Ambil dari hidden input
+                const accountNumber = $(this).find('.account-number-hidden').val().trim();
                 const accountName = $(this).find('.account-name-select').val().trim();
                 const amount = parseFloat($(this).find('.amount-input').val()) || 0;
 
@@ -1286,7 +1509,7 @@
             });
 
             if (!valid) {
-                showAlert('All account rows must have valid account number, name, and amount greater than 0.', 'warning');
+                showAlert('Semua baris account harus memiliki nomor account, nama, dan amount yang valid.', 'warning');
             }
 
             return valid;
@@ -1296,10 +1519,10 @@
         function showAlert(message, type = 'info') {
             const alertClass = `alert-${type}`;
             const alertHtml = `
-        <div class="alert ${alertClass}">
-            ${message}
-        </div>
-    `;
+                <div class="alert ${alertClass}">
+                    ${message}
+                </div>
+            `;
 
             $('#alertContainer').html(alertHtml);
 
@@ -1309,6 +1532,27 @@
                 });
             }, 5000);
         }
+
+        // Debug functions
+        window.debugAccountData = function() {
+            console.log('=== PAYMENT VOUCHER DEBUG ===');
+            console.log('Accounts array:', accounts);
+            console.log('Total accounts:', accounts.length);
+            
+            $('.account-name-select').each(function(index) {
+                const $select = $(this);
+                const $row = $select.closest('.account-row');
+                console.log(`Select ${index + 1}:`, {
+                    name: $select.attr('name'),
+                    optionsCount: $select.find('option').length,
+                    accountNumber: $row.find('.account-number-display').val(),
+                    accountNameValue: $select.val(),
+                    hasSelect2: $select.hasClass('select2-hidden-accessible')
+                });
+            });
+        };
+
+       
     </script>
 </body>
 
