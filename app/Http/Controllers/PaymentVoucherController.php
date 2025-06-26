@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Voucher;
 use App\Models\VoucherDetail;
+use App\Services\VoucherNumberService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,9 +13,22 @@ use Illuminate\Support\Facades\Validator;
 
 class PaymentVoucherController extends Controller
 {
-    public function index()
+    protected $voucherService;
+
+    public function __construct(VoucherNumberService $voucherService)
     {
-        return view('payment.index');
+        $this->voucherService = $voucherService;
+    }
+    public function index(Request $request)
+    {
+        $voucherType = $request->get('voucher_type', 'PV');
+
+        // Generate voucher number
+        $voucherNumber = $this->voucherService->generateVoucherNumber($voucherType);
+
+        // Data voucher types untuk dropdown
+        $voucherTypes = $this->voucherService->getVoucherTypes();
+        return view('payment.index', compact('voucherNumber', 'voucherTypes', 'voucherType'));
     }
     public function store(Request $request)
     {
@@ -550,6 +564,36 @@ class PaymentVoucherController extends Controller
             return back()
                 ->withErrors(['error' => 'Update failed: ' . $e->getMessage()])
                 ->withInput();
+        }
+    }
+    public function generateNumber(Request $request)
+    {
+        $type = $request->get('type', 'PV');
+
+        try {
+            $number = $this->voucherService->generateVoucherNumber($type);
+            return response()->json(['success' => true, 'voucher_number' => $number]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
+        }
+    }
+    public function generateVoucherNumber(Request $request)
+    {
+        $voucherType = $request->get('type', 'PV');
+
+        try {
+            $voucherNumber = $this->voucherService->generateVoucherNumber($voucherType);
+
+            return response()->json([
+                'success' => true,
+                'voucher_number' => $voucherNumber,
+                'type' => $voucherType
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 }

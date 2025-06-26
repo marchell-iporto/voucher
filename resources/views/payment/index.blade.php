@@ -697,12 +697,27 @@
                     <!-- Form Grid -->
                     <div class="form-grid">
                         <!-- No. Voucher -->
+                       <div class="form-field">
+                            <label class="form-label">Voucher Type</label>
+                            <span class="form-colon">:</span>
+                            <div class="form-input-wrapper">
+                                <!-- Hidden input dengan value RV -->
+                                <input type="hidden" name="voucher_type" value="PV">
+
+                                <!-- Display text untuk user (read-only) -->
+                                <input type="text" class="form-input" value="PV - Payment Voucher" readonly>
+                            </div>
+                        </div>
+                        <!-- Voucher Number Field - FORM ANDA -->
                         <div class="form-field">
                             <label class="form-label">No. Voucher</label>
                             <span class="form-colon">:</span>
                             <div class="form-input-wrapper">
                                 <input type="text" name="voucher_number" class="form-input" required
-                                    value="{{ $voucherNumber ?? '' }}" placeholder="Enter voucher number">
+                                    value="{{ $voucherNumber ?? '' }}" placeholder="Enter voucher number" readonly>
+                                {{-- <button type="button" class="btn-generate" onclick="generateNewVoucherNumber()">
+                                    Generate New
+                                </button> --}}
                             </div>
                         </div>
 
@@ -1422,6 +1437,66 @@
                 });
             });
         }
+    </script>
+    <script>
+        // Auto-generate when voucher type changes
+        document.getElementById('voucherType').addEventListener('change', function() {
+            const selectedType = this.value;
+            if (selectedType) {
+                generateVoucherNumber(selectedType);
+            } else {
+                document.querySelector('input[name="voucher_number"]').value = '';
+            }
+        });
+
+        // Function to generate voucher number via AJAX
+        function generateVoucherNumber(type = null) {
+            const voucherType = type || document.getElementById('voucherType').value;
+
+            if (!voucherType) {
+                alert('Please select voucher type first');
+                return;
+            }
+
+            // Show loading
+            const voucherInput = document.querySelector('input[name="voucher_number"]');
+            voucherInput.value = 'Generating...';
+
+            fetch(`/payment-generate-voucher-number?type=${voucherType}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        voucherInput.value = data.voucher_number;
+                    } else {
+                        alert('Error generating voucher number: ' + data.message);
+                        voucherInput.value = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error generating voucher number');
+                    voucherInput.value = '';
+                });
+        }
+
+        // Generate new voucher number button
+        function generateNewVoucherNumber() {
+            generateVoucherNumber();
+        }
+
+        // Auto-generate on page load if type is selected
+        document.addEventListener('DOMContentLoaded', function() {
+            const voucherType = document.getElementById('voucherType').value;
+            if (voucherType && !document.querySelector('input[name="voucher_number"]').value) {
+                generateVoucherNumber(voucherType);
+            }
+        });
     </script>
 </body>
 

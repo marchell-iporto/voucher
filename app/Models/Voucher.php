@@ -28,6 +28,14 @@ class Voucher extends Model
         'total_amount' => 'decimal:2',
     ];
 
+    const VOUCHER_TYPES = [
+        'PV' => 'Payment Voucher',
+        'RV' => 'Receipt Voucher',
+        'JV' => 'Journal Voucher',
+        'CV' => 'Cash Voucher',
+        'BV' => 'Bank Voucher'
+    ];
+
     /**
      * Get the details for the voucher.
      */
@@ -71,32 +79,33 @@ class Voucher extends Model
     /**
      * Generate voucher number.
      */
-    public static function generateVoucherNumber($type): string
+    public static function generateVoucherNumber($type = 'PV')
     {
-        $prefix = $type === 'receive' ? 'RV' : 'PV';
-        $date = now()->format('Y/m/d');
-        $sequence = 1;
-        
-        // Get last voucher number for today
-        $lastVoucher = static::where('type', $type)
-            ->where('voucher_number', 'like', "{$prefix}-3/{$date}%")
+        if (!array_key_exists($type, self::VOUCHER_TYPES)) {
+            throw new \InvalidArgumentException("Invalid voucher type: {$type}");
+        }
+
+        $currentMonth = date('m');
+        $currentYear = date('Y');
+        $pattern = "{$type}-{$currentMonth}/{$currentYear}-%";
+
+        $lastVoucher = self::where('voucher_number', 'LIKE', $pattern)
             ->orderBy('voucher_number', 'desc')
             ->first();
-            
+
+        $nextNumber = 1;
         if ($lastVoucher) {
-            $lastSequence = (int) substr($lastVoucher->voucher_number, -4);
-            $sequence = $lastSequence + 1;
+            $parts = explode('-', $lastVoucher->voucher_number);
+            $nextNumber = intval(end($parts)) + 1;
         }
-        
-        return "{$prefix}-3/{$date}" . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        $formattedNumber = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return "{$type}-{$currentMonth}/{$currentYear}-{$formattedNumber}";
     }
 
-    /**
-     * Get voucher prefix for display.
-     */
-    public function getVoucherPrefix(): string
+    public static function getVoucherTypes()
     {
-        return $this->isReceive() ? 'RV' : 'PV';
+        return self::VOUCHER_TYPES;
     }
 
     /**
@@ -154,11 +163,11 @@ class Voucher extends Model
     public static function getByDateRange($startDate, $endDate, $type = null)
     {
         $query = static::whereBetween('date', [$startDate, $endDate]);
-        
+
         if ($type) {
             $query->where('type', $type);
         }
-        
+
         return $query->with('details')->orderBy('date', 'desc')->get();
     }
 
@@ -167,11 +176,11 @@ class Voucher extends Model
      */
     public static function search($keyword)
     {
-        return static::where(function($query) use ($keyword) {
+        return static::where(function ($query) use ($keyword) {
             $query->where('voucher_number', 'like', "%{$keyword}%")
-                  ->orWhere('from_to', 'like', "%{$keyword}%")
-                  ->orWhere('description', 'like', "%{$keyword}%")
-                  ->orWhere('reference_number', 'like', "%{$keyword}%");
+                ->orWhere('from_to', 'like', "%{$keyword}%")
+                ->orWhere('description', 'like', "%{$keyword}%")
+                ->orWhere('reference_number', 'like', "%{$keyword}%");
         })->with('details')->orderBy('date', 'desc')->get();
     }
 
